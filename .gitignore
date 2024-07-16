@@ -1,4 +1,13 @@
 build
 build/**
 
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+
+.vs
+.vs/**
+
 compile_commands.json

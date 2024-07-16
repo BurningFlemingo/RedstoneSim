@@ -4,5 +4,6 @@ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(CMAKE_SUPPRESS_REGENERATION true)
+set(CMAKE_CXX_STANDARD 20)
 
-add_subdirectory(template_project)
+add_subdirectory(RedstoneSim)

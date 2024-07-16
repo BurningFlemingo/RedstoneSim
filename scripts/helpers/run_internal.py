@@ -22,6 +22,6 @@ callingDir = os.getcwd();
 
 os.chdir(binDir)
 
-subprocess.run([binPath])
+subprocess.run([projectName])
 
 os.chdir(callingDir)

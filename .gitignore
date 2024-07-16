@@ -10,4 +10,7 @@ build/**
 .vs
 .vs/**
 
+.cache
+.cache/
+
 compile_commands.json

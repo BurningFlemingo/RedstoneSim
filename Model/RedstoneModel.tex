@@ -1,0 +1,416 @@
+% template provided by https://joshldavis.com/2014/02/12/doing-your-homework-in-latex/
+
+
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{physics}
+\usepackage{tasks}
+\usepackage{mathtools}
+\usepackage[most]{tcolorbox}
+
+\newtheorem{problem}{Problem}[section]
+\newtheorem{defn}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+
+\usetikzlibrary{automata,positioning,graphs,graphs.standard,quotes}
+ 
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{\hmwkClass: \hmwkTitle}
+\rhead{\hmwkDueDate}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+%
+% Homework Details
+%   - Title
+%   - Due date
+%   - Class
+%   - Section/Time
+%   - Instructor
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Minecraft Redstone with Graph and Set Theory}
+\newcommand{\hmwkDueDate}{June 26, 2024}
+\newcommand{\hmwkClass}{ABM}
+\newcommand{\hmwkClassInstructor}{Mr. Rios}
+\newcommand{\hmwkAuthorName}{\textbf{John Fleming}}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Due on \hmwkDueDate}\\
+    \vspace{0.1in}\large{\textit{\hmwkClassInstructor\ }}
+    \vspace{3in}
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% For derivatives
+\newcommand{\deriv}[1]{\frac{\mathrm{d}}{\mathrm{d}x} (#1)}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #1} (#2)}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+\newtcolorbox{minbox}[1][]{
+	boxrule=0.75pt,
+	boxsep=0pt,
+	sharp corners,  % Square edges
+	colframe=black,  % Set the color of the outline
+	colback=white,  % Set the color of the fill
+	coltext=black,
+	lefttitle=0pt,
+	colbacktitle=white,
+	coltitle=black,
+	after={\bigskip},
+	#1
+}
+
+
+% \begin{enumerate}[label=\(\textbf{Problem } \mathbf{\arabic*.}\), align=left]
+% \end{enumerate}
+
+% \begin{enumerate}[label=\(\mathbf{\alph*)}\), align=left]
+% \end{enumerate}
+
+% \begin{displaymath}
+% 	\begin{array}{|c c|c|}
+% 	P & Q & \neg P \vee Q\\
+% 	\hline
+% 	F & F & T\\
+% 	F & T & T\\
+% 	T & F & F\\
+% 	T & T & T\\
+% 	\end{array}
+% \end{displaymath}
+
+% \begin{minbox}[ams align*]
+% \end{minbox}
+
+% \begin{center}
+% 	\fbox{
+% 	}
+% \end{center}
+
+\begin{document}
+\maketitle
+
+\pagebreak
+
+\section{Foundations}
+
+\begin{defn} (Max)
+	
+	Let \(X\) be any \(X \subseteq \mathbb{N}_{0}\). Then
+	\begin{equation}
+		Max(X) \coloneq \{x \in X \mid \forall y \in X(x \geq y)\}
+	\end{equation}
+\end{defn}
+
+\begin{defn} (Number Set Notation)
+	\begin{align}
+		\mathbb{Z}^+ &\coloneq \mathbb{N}_{0} \setminus \{0\} \\
+		\mathbb{Z}^- &\coloneq \{n \in \mathbb{Z}\mid n < 0\} \\
+		\mathbb{Z}_{0}^- &\coloneq \mathbb{Z}^- \cup \{0\} \\
+	\end{align}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Signal Sets)
+	
+	\begin{align}
+		S &\coloneq \{0, 1, 2, ..., 15\} \\
+		S^+ &\coloneq \{x \in S \mid x > 0\} \\
+		S_{0} &\coloneq \{0\}
+	\end{align}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Component Set)
+	\begin{equation}
+		C \coloneq \{T_{c}, R1_{c}, R2_{c}, R3_{c}, R4_{c}, O_{c}, I_{c}\}
+	\end{equation}
+
+	The set of supported redstone components. 
+\end{defn}
+
+\medskip
+
+\begin{defn} (Vertices)
+	
+	Let \(V\) be a set. \\
+	Then \(V\) is a set of vertices if
+	\begin{equation}
+		V \neq \varnothing
+	\end{equation}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Directed Edges)
+	
+	Let \(V\) be any set of vertices. \\
+	Then \(E\) is a set of directed edges on \(V\) if 
+	\begin{equation}
+		E \subseteq (V \times V)
+	\end{equation}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Graph)
+	
+		Let \(V\) be any set of vertices, and let \(E\) be any set of directed edges on \(V\). \\
+		Then \(G\) is a digraph on \(V\) and \(E\) if
+		\begin{equation}
+			G = (V, E)
+		\end{equation}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Propegation)
+	
+Let \(G = (V, E)\) be any digraph. Then
+
+\begin{equation}
+	\omega^+ : V \times \mathcal{P}(G) \rightarrow \mathcal{P}(V) 
+\end{equation}
+Where
+\begin{equation*}
+	\omega^+(v, G) = 
+	\{u \in V \mid (u, v) \in E\}
+\end{equation*}
+And
+\begin{equation}
+	\omega^- : V \times \mathcal{P}(G) \rightarrow \mathcal{P}(V) 
+\end{equation}
+Where
+\begin{equation*}
+	\omega^-(v, G) = 
+	\{v \in V \mid \exists (u, v) \in E\}
+\end{equation*}
+
+\end{defn}
+
+\medskip
+
+\begin{defn} (Behavior functions)
+\begin{align}
+	& \beta_{s} : C \to (\mathcal{P}(S) \times S \times \mathbb{N}_{0} \to S) \\
+	& \beta_{o} : C \to (S \times \mathbb{N}_{0} \to S)
+\end{align}
+
+\end{defn}
+
+\medskip
+
+\begin{defn} (Redstone Digraph)
+	
+	Let:
+	
+	\begin{itemize}
+		\item \(G = (V, E)\) be any digraph
+		\item \(\Sigma : V \times \mathbb{N}_{0} \to S \times \mathbb{N}_{0}\)
+		\item \(\lambda : V \to C\)
+	\end{itemize}
+
+	Then \(G_{r}\) is a redstone digraph if 
+	\begin{equation}
+	G_{r} = (G, \lambda, \Sigma)
+	\end{equation}
+	
+\end{defn}
+	
+\begin{defn} (State)
+
+Let \(G_{r} = (G, \lambda, \Sigma)\) be any redstone digraph where \(G = (V, E)\).
+
+Now for an arbitrary tick \(t \in \mathbb{N}_{0}\), and any \(v \in V\), let
+
+\begin{equation*}
+	I = \{ u \in \omega^-(v, G) \mid ((\beta_{o} \circ \lambda)(v) \circ \Sigma)(u, t) \}
+\end{equation*}
+
+And
+
+\begin{equation}
+	\Phi = (\beta_{s} \circ \lambda)(v)(I, \Sigma(v, t))
+\end{equation}
+
+Now let 
+\begin{equation}
+	D = \{\varphi \in S \mid (\varphi, \delta) \in \Sigma(v, t), \delta \in \mathbb{N}_{0}\} \cup \{\Phi\}
+\end{equation}
+
+And let
+
+\begin{equation}
+	\Delta = 
+	\begin{cases}
+		\delta + 1,\, (\varphi, \delta) \in \Sigma(v, t) & \text{if } (D \subseteq S^+) \vee (D \subseteq S_{0})\\	
+		0 & \text{otherwise} \\	
+	\end{cases}
+\end{equation}
+
+Then
+
+\begin{equation}
+	\Sigma(v, t + 1)|_{V \times \mathbb{Z}^+} = (\Phi, \Delta) \\
+\end{equation}
+
+Note: the state mapping isn't defined for \(t = 0\) to allow the implimentation to define a custom mapping for all 
+vertices at \(t = 0\).
+
+\end{defn}
+
+\section{Redstone Objects}
+
+\begin{defn} (Redstone Torch)
+
+	Let
+	\begin{align}
+		& T_{s} : \mathcal{P}(S) \times S \times \mathbb{N}_{0} \rightarrow S \\
+		& T_{o} : S \times \mathbb{N}_{0} \rightarrow S
+	\end{align}
+	Where
+	\begin{align}
+		& T_{s}(I, \varphi, \delta) =
+		\begin{cases}
+			0 & \text{if } Max(I) \subseteq S_{0} \\
+			15 & \text{otherwise}
+		\end{cases} \\[\jot]
+		& T_{o}(\varphi, \delta) =
+		\begin{cases}
+			15 & \text{if } \varphi \in S_{0} \\
+			0 & \text{otherwise}
+		\end{cases}
+	\end{align}
+	Then
+	\begin{align}
+		& \beta_{s}(T_{c}) = T_{s} \\
+		& \beta_{o}(T_{c}) = T_{o}
+	\end{align}
+\end{defn}
+
+\begin{defn} (Repeater(s))
+	
+	Let
+	\begin{align}
+		& n \in \{1, 2, 3, 4\}, Rn_{s} : \mathcal{P} (S) \times S \times \mathbb{N}_{0} \rightarrow S \\
+		& n \in \{1, 2, 3, 4\}, Rn_{o} : S \times \mathbb{N}_{0} \rightarrow S
+	\end{align}
+	Where
+	\begin{align}
+		& Rn_{s}(I, \varphi, \delta) = 
+		\begin{cases}
+			15 & \text{if } Max(I) \subseteq S^+\\
+			15 & \text{if } (\varphi \in S^+) \land (Max(I) \subseteq S_{0}) \land (\delta < n) \\
+			0 & \text{ otherwise }
+		\end{cases} \\[\jot]
+		& Rn_{o}(\varphi, \delta) = 
+		\begin{cases}
+			15 & \text{if } (|\varphi \cap S^+| > 1) \land (\delta >= n) \\
+			15 & \text{if } (\varphi \subseteq S_{0}) \land (\delta < n) \\
+			0 & \text{ otherwise }
+			\end{cases}
+	\end{align}
+	Then
+	\begin{align}
+			& n \in {1, 2, 3, 4}, \beta_{s}(Rn_{c}) = Rn_{s} \\
+			& n \in {1, 2, 3, 4}, \beta_{o}(Rn_{c}) = Rn_{o}
+	\end{align}
+\end{defn}
+
+\begin{defn} (Lamp (Output))
+	
+	Let
+	\begin{align}
+		& O_{s} : \mathcal{P} (S) \times S \times \mathbb{N}_{0} \rightarrow S \\
+		& O_{o} : S \times \mathbb{N}_{0} \rightarrow S
+	\end{align}
+	Where
+	\begin{align}
+		&O_{s}(I, \varphi, \delta) = 
+		\begin{cases}
+			0 & \text{if } Max(I) \subseteq S_{0} \\
+			15 & \text{otherwise}
+		\end{cases} \\[\jot]
+		&O_{o}(\varphi, \delta) = 
+		\begin{cases}
+			15 & \text{if } (\varphi \cap S^+| > 1) \\
+			15 & \text{if } (\varphi \subseteq S_{0}) \land (\delta = 0) \\
+			0 & \text{otherwise}
+		\end{cases}
+	\end{align}
+	Then
+	\begin{align}
+		& \beta_{s}(O_{c}) = O_{s} \\
+		& \beta_{o}(O_{c}) = O_{o}
+	\end{align}
+\end{defn}
+
+\begin{defn} (Lever (Input))
+	
+	Let
+	\begin{align}
+		& I_{s} : \mathcal{P} (S) \times S \times \mathbb{N}_{0} \rightarrow S \\
+		& I_{o} : S \times \mathbb{N}_{0} \rightarrow S
+	\end{align}
+	Where
+	\begin{align}
+		& I_{s}(I, \varphi, \delta) = \varphi \\
+		& I_{o}(\varphi, \delta) = \varphi
+	\end{align}
+	Then
+	\begin{align}
+		& \beta_{s}(I_{c}) = I_{s} \\
+		& \beta_{o}(I_{c}) = I_{o}
+	\end{align}
+\end{defn}
+
+\end{document}
+

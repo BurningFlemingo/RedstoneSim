@@ -4,7 +4,7 @@ import subprocess
 import subprocess
 import platform
 
-buildType = "internal"
+buildType = "debug"
 projectName = "RedstoneSim"
 
 buildPlatform = platform.system().lower();

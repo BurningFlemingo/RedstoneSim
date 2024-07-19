@@ -10,9 +10,10 @@ struct VertexState {
 };
 
 using Edges = std::vector<std::pair<int, int>>;
-using Vertices = std::vector<Component>;
+using Components = std::vector<Component>;
 
+// vertices are indices.
 struct Graph {
-	Vertices vertices;
+	Components vertexComponentMapping;
 	Edges edges;
 };

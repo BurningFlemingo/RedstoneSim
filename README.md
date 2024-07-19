@@ -1,4 +1,8 @@
-A set and graph theoretic model of minecraft redstone, and a simulation using it.
+Simulates redstone circuits over time.
+
+Currently only supports levers and torches. 
+
+Note: cyclic graphs have an exponential time complexity, while acyclic graphs have linear time complexity.
 
 ## Building
 

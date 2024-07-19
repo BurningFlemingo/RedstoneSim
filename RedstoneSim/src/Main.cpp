@@ -2,7 +2,7 @@
 #include <vector>
 #include <functional>
 #include <assert.h>
-#include <set>
+#include <span>
 #include <unordered_map>
 #include <tuple>
 
@@ -18,7 +18,7 @@ bool isSignalValid(int signal) {
 	return true;
 }
 
-int max(const std::set<int>& signalInputs) {
+int max(std::span<int> signalInputs) {
 	int largestSignal{};
 	for (const auto signal : signalInputs) {
 		assert(isSignalValid(signal));
@@ -45,7 +45,7 @@ namespace OBF {
 
 // state behavior function
 namespace SBF {
-	int torch(const std::set<int>& signalInputs, const VertexState& state) {
+	int torch(std::span<int> signalInputs, const VertexState& state) {
 		assert(isSignalValid(max(signalInputs)));
 
 		if (max(signalInputs) == 0) {
@@ -54,7 +54,7 @@ namespace SBF {
 		return MAX_SIGNAL_VALUE;
 	}
 
-	int lever(const std::set<int>& signalInputs, const VertexState& state) {
+	int lever(const std::span<int>& signalInputs, const VertexState& state) {
 		assert(isSignalValid(state.saturation));
 		return state.saturation;
 	}
@@ -62,20 +62,21 @@ namespace SBF {
 }  // namespace SBF
 
 namespace {
-	std::function<int(const std::set<int>&, const VertexState&)>
-		stateBehaviors[]{ SBF::torch, SBF::lever };
+	std::function<int(std::span<int>, const VertexState&)> stateBehaviors[]{
+		SBF::torch, SBF::lever
+	};
 
 	std::function<int(const VertexState&)> outputBehaviors[]{ OBF::torch,
 															  OBF::lever };
 }  // namespace
 
-std::set<int> propegateBack(int vertex, const Graph& graph) {
+std::vector<int> propegateBack(int vertex, const Graph& graph) {
 	assert(vertex < graph.vertexComponentMapping.size());
 
-	std::set<int> verticesFound{};
+	std::vector<int> verticesFound{};
 	for (const auto& edge : graph.edges) {
 		if (edge.second == vertex) {
-			verticesFound.insert(edge.first);
+			verticesFound.emplace_back(edge.first);
 		}
 	}
 	return verticesFound;
@@ -98,9 +99,9 @@ VertexState getVertexState(
 		return initialState[vertex];
 	}
 
-	std::set<int> inputVertices{ propegateBack(vertex, graph) };
+	std::vector<int> inputVertices{ propegateBack(vertex, graph) };
 
-	std::set<int> inputSignals{};
+	std::vector<int> inputSignals{};
 	for (const auto& inVertex : inputVertices) {
 		Component inComponent{ graph.vertexComponentMapping[inVertex] };
 		VertexState inVertexState{
@@ -108,7 +109,7 @@ VertexState getVertexState(
 		};
 		int inSignal{ outputBehaviors[inComponent](inVertexState) };
 
-		inputSignals.insert(inSignal);
+		inputSignals.emplace_back(inSignal);
 	}
 
 	VertexState state{};

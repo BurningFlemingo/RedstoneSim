@@ -19,23 +19,24 @@ bool isSignalValid(int signal) {
 }
 
 int max(const std::set<int>& signalInputs) {
-	int max{};
+	int largestSignal{};
 	for (const auto signal : signalInputs) {
-		if (signal > max) {
-			max = signal;
+		assert(isSignalValid(signal));
+		if (signal > largestSignal) {
+			largestSignal = signal;
 		}
 	}
 
-	return max;
+	return largestSignal;
 }
 
 // output behavior function
 namespace OBF {
 	int torch(const VertexState& state) {
-		if (state.saturation == 0) {
-			return 15;
+		if (state.saturation == MIN_SIGNAL_VALUE) {
+			return MAX_SIGNAL_VALUE;
 		}
-		return 0;
+		return MIN_SIGNAL_VALUE;
 	}
 	int lever(const VertexState& state) {
 		return state.saturation;
@@ -45,13 +46,16 @@ namespace OBF {
 // state behavior function
 namespace SBF {
 	int torch(const std::set<int>& signalInputs, const VertexState& state) {
+		assert(isSignalValid(max(signalInputs)));
+
 		if (max(signalInputs) == 0) {
-			return 0;
+			return MIN_SIGNAL_VALUE;
 		}
-		return 15;
+		return MAX_SIGNAL_VALUE;
 	}
 
 	int lever(const std::set<int>& signalInputs, const VertexState& state) {
+		assert(isSignalValid(state.saturation));
 		return state.saturation;
 	}
 
@@ -66,6 +70,8 @@ namespace {
 }  // namespace
 
 std::set<int> propegateBack(int vertex, const Graph& graph) {
+	assert(vertex < graph.vertexComponentMapping.size());
+
 	std::set<int> verticesFound{};
 	for (const auto& edge : graph.edges) {
 		if (edge.second == vertex) {
@@ -76,20 +82,23 @@ std::set<int> propegateBack(int vertex, const Graph& graph) {
 }
 
 VertexState getVertexState(
-	int vertexIndex,
+	int vertex,
 	int t,
 	const std::vector<VertexState>& initialState,
 	const Graph& graph
 ) {
+	assert(vertex < graph.vertexComponentMapping.size());
+	assert(initialState.size() == graph.vertexComponentMapping.size());
+
 	static std::vector<std::pair<int, VertexState>> memoizedVertexState(
 		graph.vertexComponentMapping.size()
 	);
 
 	if (t <= 0) {
-		return initialState[vertexIndex];
+		return initialState[vertex];
 	}
 
-	std::set<int> inputVertices{ propegateBack(vertexIndex, graph) };
+	std::set<int> inputVertices{ propegateBack(vertex, graph) };
 
 	std::set<int> inputSignals{};
 	for (const auto& inVertex : inputVertices) {
@@ -103,16 +112,14 @@ VertexState getVertexState(
 	}
 
 	VertexState state{};
-	std::pair<int, VertexState> memoizedState{
-		memoizedVertexState[vertexIndex]
-	};
+	std::pair<int, VertexState> memoizedState{ memoizedVertexState[vertex] };
 	if (memoizedState.first == t - 1) {
 		state = memoizedState.second;
 	} else {
-		state = getVertexState(vertexIndex, t - 1, initialState, graph);
+		state = getVertexState(vertex, t - 1, initialState, graph);
 	}
 
-	Component component{ graph.vertexComponentMapping[vertexIndex] };
+	Component component{ graph.vertexComponentMapping[vertex] };
 	int newSaturation{ stateBehaviors[component](inputSignals, state) };
 
 	int newDuration{};
@@ -122,7 +129,7 @@ VertexState getVertexState(
 
 	VertexState newState{ .saturation = newSaturation,
 						  .duration = newDuration };
-	memoizedVertexState[vertexIndex] = { t, newState };
+	memoizedVertexState[vertex] = { t, newState };
 
 	return newState;
 }

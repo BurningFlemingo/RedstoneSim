@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <tuple>
 #include <set>
+#include <sstream>
 
 #include <raylib.h>
 
@@ -150,13 +151,7 @@ int main() {
 
 	Graph graph{};
 
-	// std::vector<VertexState> initialState(
-	// 	graph.vertexComponentMapping.size(), VertexState{ 0, 4 }
-	// );
-
-	// initialState[0] = { 15, 4 };
-
-	int outputVertex{ 0 };
+	std::vector<VertexState> initialState;
 
 	const int screenWidth = 800;
 	const int screenHeight = 450;
@@ -170,35 +165,45 @@ int main() {
 	SetTargetFPS(60);  // Set our game to run at 60 frames-per-second
 	//--------------------------------------------------------------------------------------
 
-	// VertexState state{
-	// 	getVertexState(outputVertex, tick, initialState, graph)
-	// };
-	// int signal{
-	// 	outputBehaviors[graph.vertexComponentMapping[outputVertex]](state)
-	// };
+	Color darkestGray{ GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_NORMAL)) };
+	Color darkGray{ GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)) };
+	Color medGray{ GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_DISABLED)) };
+	Color lightGray{ GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_DISABLED)) };
 
 	float vertexRadius{ 20.f };
-	Color vertexColor{ WHITE };
+	Color vertexColor{ RAYWHITE };
+	Color edgeColor{ lightGray };
+	Color vertexTextColor{ BLACK };
 
 	bool selected{};
 	int selectedVertex{ 0 };
 
 	Vector2 mousePosition{};
 	std::vector<Vector2> vertexLocations;
-	while (!WindowShouldClose()) {
-		BeginDrawing();
-		ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
+	float zoom{ 0.5 };
 
-		for (const auto& edge : graph.edges) {
-			Vector2 second{};
-			DrawLineEx(
-				vertexLocations[edge.first],
-				vertexLocations[edge.second],
-				3,
-				BLACK
-			);
-		}
+	float menuLeftSize{ 20 };
+	float menuRightSize{ 200 };
+	float menuTopSize{ 50 };
+	float menuBottomSize{ 10 };
+
+	float menuBorderSize{ 2.f };
+
+	int tick{};
+
+	int simulatedVertex{};
+	int simulatedVertexOutput{};
+	bool runSim{};
+
+	Component selectedComponent{ NullComponent };
+
+	bool torch{};
+	bool lever{};
+
+	int outputVertex{};
+	while (!WindowShouldClose()) {
 		mousePosition = GetMousePosition();
+		bool inMenu{ mousePosition.x >= screenWidth - menuRightSize };
 
 		float closestVertexDistance{ 100000000000.f };
 		int closestVertex{ -1 };
@@ -212,23 +217,10 @@ int main() {
 			}
 		}
 		bool overlapping{};
-		if (closestVertexDistance <= vertexRadius * 2.f) {
+		if (closestVertexDistance <= vertexRadius * 2.f * zoom) {
 			overlapping = true;
 		}
-		if (overlapping && selected) {
-			DrawLineEx(
-				vertexLocations[selectedVertex],
-				vertexLocations[closestVertex],
-				3,
-				BLACK
-			);
-		} else if (selected) {
-			DrawLineEx(
-				vertexLocations[selectedVertex], mousePosition, 3, BLACK
-			);
-		}
-
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !inMenu) {
 			if (overlapping) {
 				if (selected) {
 					selected = false;
@@ -240,70 +232,178 @@ int main() {
 				}
 			} else if (selected) {
 				selected = false;
-			} else {
+			} else if (selectedComponent != NullComponent) {
 				vertexLocations.emplace_back(mousePosition);
-				graph.vertexComponentMapping.emplace_back(RedstoneTorch);
+				graph.vertexComponentMapping.emplace_back(selectedComponent);
 			}
 		}
-		if (!overlapping && !selected) {
-			DrawCircleV(mousePosition, vertexRadius, Fade(vertexColor, 0.5f));
+
+		if (!IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+			if (selected && overlapping) {
+				graph.edges.emplace_back(std::pair<int, int>{ selectedVertex,
+															  closestVertex });
+				selected = false;
+			} else if (selected) {
+				selected = false;
+			}
 		}
 
-		DrawLine(500, 0, 500, GetScreenHeight(), Fade(LIGHTGRAY, 0.6f));
-		DrawRectangle(
-			500,
-			0,
-			GetScreenWidth() - 500,
-			GetScreenHeight(),
-			Fade(LIGHTGRAY, 0.3f)
-		);
+		if (IsKeyDown(KEY_SPACE) && graph.vertexComponentMapping.size() > 0) {
+			runSim = true;
+			tick++;
+		} else {
+			runSim = false;
+		}
 
-		bool checked{};
-		GuiCheckBox(Rectangle{ 600, 320, 20, 20 }, "box", &checked);
+		BeginDrawing();
+		ClearBackground(darkestGray);
 
+		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+			if (overlapping && selected) {
+				DrawLineEx(
+					vertexLocations[selectedVertex],
+					vertexLocations[closestVertex],
+					3 * zoom,
+					edgeColor
+				);
+			} else if (selected) {
+				DrawLineEx(
+					vertexLocations[selectedVertex],
+					mousePosition,
+					3 * zoom,
+					edgeColor
+				);
+			}
+		}
+		for (const auto& edge : graph.edges) {
+			DrawLineEx(
+				vertexLocations[edge.first],
+				vertexLocations[edge.second],
+				3 * zoom,
+				edgeColor
+			);
+		}
+
+		if (!inMenu) {
+			if (!overlapping && !selected) {
+				DrawCircleV(
+					mousePosition, vertexRadius * zoom, Fade(vertexColor, 0.5f)
+				);
+			}
+		}
 		for (int i{}; i < vertexLocations.size(); i++) {
 			const Vector2 vertex{ vertexLocations[i] };
 
 			if (Vector2Distance(mousePosition, vertex) <= vertexRadius) {
-				DrawCircleLines(vertex.x, vertex.y, vertexRadius, PINK);
+				DrawCircleLines(vertex.x, vertex.y, vertexRadius * zoom, PINK);
 			}
-			DrawCircle(vertex.x, vertex.y, vertexRadius, vertexColor);
+			DrawCircle(vertex.x, vertex.y, vertexRadius * zoom, vertexColor);
 		}
 
-		if (selected) {
-			DrawCircleLinesV(
-				vertexLocations[selectedVertex], vertexRadius, YELLOW
-			);
-		}
-
-		DrawLine(
-			500,
-			0,
-			500,
-			GetScreenHeight(),
-			GetColor(GuiGetStyle(COMBOBOX, LINE_COLOR))
-		);
+		// right
 		DrawRectangle(
-			500,
+			screenWidth - menuRightSize,
 			0,
-			GetScreenWidth() - 500,
-			GetScreenHeight(),
-			GetColor(GuiGetStyle(STATUSBAR, BACKGROUND_COLOR))
+			menuRightSize,
+			screenHeight,
+			darkGray
+		);
+		// bottom
+		DrawRectangle(
+			0,
+			screenHeight - menuBottomSize,
+			screenWidth,
+			menuBottomSize,
+			darkGray
 		);
 
-		float startAngle{};
-		GuiSliderBar(
-			{ 600, 40, 120, 20 }, "StartAngle", NULL, &startAngle, -450, 450
+		// left
+		DrawRectangle(0, 0, menuLeftSize, screenHeight, darkGray);
+		// top
+		DrawRectangle(0, 0, screenWidth, menuTopSize, darkGray);
+
+		// left
+		DrawLineEx(
+			{ menuLeftSize - menuBorderSize, menuTopSize - menuBorderSize },
+			{ menuLeftSize - menuBorderSize,
+			  screenHeight - (menuBottomSize - menuBorderSize + 1) },
+			menuBorderSize,
+			darkestGray
+		);
+		// top
+		DrawLineEx(
+			{ menuLeftSize - menuBorderSize, menuTopSize - menuBorderSize },
+			{ (screenWidth - menuRightSize), menuTopSize - menuBorderSize },
+			menuBorderSize,
+			darkestGray
 		);
 
-		DrawFPS(10, 10);
+		// bottom
+		DrawLineEx(
+			{ menuLeftSize - (menuBorderSize + 1),
+			  screenHeight - menuBottomSize },
+			{ (screenWidth - menuRightSize), screenHeight - menuBottomSize },
+			menuBorderSize,
+			lightGray
+		);
+		// right
+		DrawLineEx(
+			{ screenWidth - menuRightSize, menuTopSize - (menuBorderSize + 1) },
+			{ screenWidth - menuRightSize, screenHeight - menuBottomSize },
+			menuBorderSize,
+			lightGray
+		);
 
 		DrawRectangleLines(
 			600, 80, 120, 40, GetColor(GuiGetStyle(TEXTBOX, LINE_COLOR))
 		);
 
+		GuiCheckBox({ screenWidth - 150, 100, 50, 20 }, "torch", &torch);
+		GuiCheckBox({ screenWidth - 150, 120, 50, 20 }, "lever", &lever);
+
+		if (torch && lever) {
+			selectedComponent = NullComponent;
+		} else if (torch) {
+			selectedComponent = RedstoneTorch;
+		} else if (lever) {
+			selectedComponent = Lever;
+		}
+
+		if (runSim) {
+			VertexState vertexState{
+				getVertexState(outputVertex, tick, initialState, graph)
+			};
+			simulatedVertexOutput =
+				outputBehaviors[graph.vertexComponentMapping[outputVertex]](
+					vertexState
+				);
+		}
+
+		std::stringstream outputString{
+			TextFormat("%i = %i", tick, simulatedVertexOutput)
+		};
+		GuiDrawText(
+			outputString.str().data(),
+			{ screenWidth - 150, 60, 50, 20 },
+			TEXT_ALIGN_MIDDLE,
+			WHITE
+		);
+
+		for (int i{}; i < graph.vertexComponentMapping.size(); i++) {
+			std::stringstream vertexString{ TextFormat("%i", i) };
+
+			GuiDrawText(
+				vertexString.str().data(),
+				Rectangle{ vertexLocations[i].x - vertexRadius,
+						   vertexLocations[i].y,
+						   vertexRadius * 2,
+						   0 },
+				TEXT_ALIGN_CENTER,
+				vertexTextColor
+			);
+		}
+
 		EndDrawing();
-		//----------------------------------------------------------------------------------
 	}
 
 	CloseWindow();

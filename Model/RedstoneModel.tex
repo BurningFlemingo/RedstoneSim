@@ -169,6 +169,17 @@
 
 \medskip
 
+\begin{defn} (Max Delay)
+	
+	\begin{equation}
+		D_{m} \coloneq 4
+	\end{equation}
+
+	Max delay of any component.
+\end{defn}
+
+\medskip
+
 \begin{defn} (Component Set)
 	\begin{equation}
 		C \coloneq \{T_{c}, R1_{c}, R2_{c}, R3_{c}, R4_{c}, O_{c}, I_{c}\}
@@ -269,29 +280,31 @@ Where
 
 Let \(G_{r} = (G, \lambda, \Sigma)\) be any redstone digraph where \(G = (V, E)\).
 
-Now for an arbitrary tick \(t \in \mathbb{N}_{0}\), and any \(v \in V\), let
+For any vertex \(v \in V\) at an arbitrary tick \(t \in \mathbb{N}_{0}\), \(I_{v}\) is a set of Input Signals 
+if
 
 \begin{equation*}
-	I = \{ u \in \omega^-(v, G) \mid ((\beta_{o} \circ \lambda)(v) \circ \Sigma)(u, t) \}
+	I_{v} = \{ ((\beta_{o} \circ \lambda)(v) \circ \Sigma)(u, t) \mid u \in \omega^-(v, G)  \}
 \end{equation*}
+
+and \(D_{v}\) is a set of Input Durations if
+
+\begin{equation}
+	D_{v} = \{\varphi \in S \mid (\varphi, \delta) \in \Sigma(v, t), \delta \in \mathbb{N}_{0}\} \cup \{\Phi\}
+\end{equation}
+
+Where
+
+\begin{equation}
+	\Phi = (\beta_{s} \circ \lambda)(v)(I_{v}, \Sigma(v, t))
+\end{equation}
 
 And
 
 \begin{equation}
-	\Phi = (\beta_{s} \circ \lambda)(v)(I, \Sigma(v, t))
-\end{equation}
-
-Now let 
-\begin{equation}
-	D = \{\varphi \in S \mid (\varphi, \delta) \in \Sigma(v, t), \delta \in \mathbb{N}_{0}\} \cup \{\Phi\}
-\end{equation}
-
-And let
-
-\begin{equation}
 	\Delta = 
 	\begin{cases}
-		\delta + 1,\, (\varphi, \delta) \in \Sigma(v, t) & \text{if } (D \subseteq S^+) \vee (D \subseteq S_{0})\\	
+		\delta + 1,\, (\varphi, \delta) \in \Sigma(v, t) & \text{if } (D_{v} \subseteq S^+) \vee (D_{v} \subseteq S_{0})\\	
 		0 & \text{otherwise} \\	
 	\end{cases}
 \end{equation}
@@ -302,7 +315,7 @@ Then
 	\Sigma(v, t + 1)|_{V \times \mathbb{Z}^+} = (\Phi, \Delta) \\
 \end{equation}
 
-Note: the state mapping isn't defined for \(t = 0\) to allow the implimentation to define a custom mapping for all 
+Note: the state mapping isn't defined for \(t = 0\) to allow the implementation to define a custom mapping for all 
 vertices at \(t = 0\).
 
 \end{defn}
@@ -411,6 +424,81 @@ vertices at \(t = 0\).
 		& \beta_{o}(I_{c}) = I_{o}
 	\end{align}
 \end{defn}
+
+\begin{proof} Clock proof
+	
+	\begin{itemize}
+		\item Let \(G_{r} = (G, \lambda, \Sigma)\) be a redstone digraph where \(G = (V, E)\). 
+		\item Let \(V = \{t_{1}, t_{2}, t_{3}\}\) and \(E = \{(t_{1}, t_{2}), (t_{2}, t_{3}), (t_{3}, t_{1})\}\).
+		\item Let \(\forall v \in V(\lambda(v) = T_{c})\).
+		\item Let \(\forall v \in V(\Sigma(v, 0) = (0, D_{m}))\).
+	\end{itemize}
+
+	For \(t_{3}\) (vertex) at \(t = 1\) (tick), \(I_{t_{3}}\) is a set of Input Vertices where 
+	\begin{align*}
+		& I_{t_{3}} = \{((\beta_{o} \circ \lambda)(t_{3}) \circ \Sigma)(t_{2}, 0)\} \\
+		& = \{(\beta_{o} \circ T_{c} \circ \Sigma)(t_{2}, 0)\} \\
+		& = \{T_{o}(\Sigma(t_{2}, 0)\} \\
+		& = \{T_{o}(0, 4)\} \\
+		& = \{15\} \\
+	\end{align*}
+
+	Now let
+
+	\begin{align*}
+		& \Phi = (\beta_{s} \circ \lambda)(v_{3})(I_{v_{3}}, \Sigma(v_{3}, 0)) \\
+		& = (\beta_{s} \circ T_{c})(\{15\}, 0, 4) \\
+		& = T_{s}(\{15\}, 0, 4) \\
+		& =  15 \\
+	\end{align*}
+	
+	Then \(D_{t_{3}}\) is a set of Input Durations where
+	\begin{align*}
+		& D_{t_{3}} = \{\phi \in S \mid (\phi, \delta) \in \Sigma(v_{3}, 0)\} \cup \{\Phi\} \\
+		& = \{0\} \cup \{15\} \\
+		& = \{0, 15\} \\
+	\end{align*}
+
+	Now let 
+	\begin{align*}
+		\Delta = 0
+	\end{align*}
+
+	Then
+	
+	\begin{align*}
+		& \Sigma(t_{3}, 1) = (\Phi, \Delta) \\
+		& = (15, 0)
+	\end{align*}
+
+	And the output at \(t = 1\) is then 
+	\begin{align*}
+		(\beta_{o} \circ \lambda)(t_{3})(\Sigma(t_{3}, 1) &= (\beta_{o} \circ T_{c})(\Sigma(t_{3}, 1)) \\
+		& = T_{o}(\Sigma(t_{3}, 1)) \\ 
+		& = T_{o}(15, 0) \\ 
+		& = 0 \\ 
+	\end{align*}
+
+	And the output at \(t = 0\) is 
+	\begin{align*}
+		(\beta_{o} \circ \lambda)(t_{3})(\Sigma(t_{3}, 0) &= (\beta_{o} \circ T_{c})(\Sigma(t_{3}, 0)) \\
+		& = T_{o}(\Sigma(t_{3}, 0)) \\ 
+		& = T_{o}(0, 4) \\ 
+		& = 15 \\ 	
+	\end{align*}
+
+	Finally, it is then proven that
+
+	\begin{displaymath}
+		\begin{array}{|c|c|c|}
+		t_{3} & t = 0 & t = 1\\
+ 		\hline
+		0 & 15 & 0
+ 		\end{array}
+	\end{displaymath}
+
+	
+\end{proof}
 
 \end{document}
 

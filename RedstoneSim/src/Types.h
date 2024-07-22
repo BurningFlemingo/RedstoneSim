@@ -2,7 +2,7 @@
 #include <vector>
 #include <tuple>
 
-enum Component : int { RedstoneTorch = 0, Lever };
+enum Component : int { RedstoneTorch = 0, Lever, NullComponent };
 
 struct VertexState {
 	int saturation;

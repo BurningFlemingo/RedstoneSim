@@ -4,16 +4,15 @@
 
 enum Component : int { RedstoneTorch = 0, Lever, NullComponent };
 
-struct VertexState {
-	int saturation;
-	int duration;
+using Edge = std::pair<int, int>;
+struct Dropoff {
+	int backInputDropoff;
+	int sideInputDropoff{ 15 };
 };
-
-using Edges = std::vector<std::pair<int, int>>;
-using Components = std::vector<Component>;
 
 // vertices are indices.
 struct Graph {
-	Components vertexComponentMapping;
-	Edges edges;
+	std::vector<Component> vertexComponentMapping;
+	std::vector<Edge> edges;
+	std::vector<Dropoff> dropoffs;
 };

@@ -14,7 +14,11 @@
 \usepackage{physics}
 \usepackage{tasks}
 \usepackage{mathtools}
+\usepackage{outlines}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage[most]{tcolorbox}
+\usepackage{multicol}
 
 \newtheorem{problem}{Problem}[section]
 \newtheorem{defn}{Definition}[section]
@@ -138,55 +142,222 @@
 
 \pagebreak
 
-\section{Foundations}
+\section{Notation}
+\noindent
 
-\begin{defn} (Max)
-	
-	Let \(X\) be any \(X \subseteq \mathbb{N}_{0}\). Then
-	\begin{equation}
-		Max(X) \coloneq \{x \in X \mid \forall y \in X(x \geq y)\}
-	\end{equation}
-\end{defn}
+\begin{multicols}{2}
+\subsection*{Standard}
+\begin{description}
+    \item[\(\implies\)] implies
+    \item[\(\iff\)] if and only if 
+    \item[\(\varnothing\)] empty set
+    \item[\(\cup\)] union 
+    \item[\(\cap\)] intersection
+    \item[\(A \subseteq B\)] improper subset
+    \item[\(A \to B\)] maps to
+    \item[\(A \setminus B\)] difference of sets 
+    \item[\(A \coloneq B\)] is defined to be 
+    \item[\(A \times B\)] Cartesian product (see Definition \ref{defn:cartesian_product})
+	\item[\((a, b)\)] ordered pair (see Definition \ref{defn:pair})
+    \item[\((n_{1}, n_{2}, \ldots, n_{n})\)] tuple (see Definition \ref{defn:pair})
+    \item[\(\mathcal{P}(A)\)] power set
+	\item[\(f : A \to B\)] function mapping (see Definition \ref{defn:function})
+    \item[\(B^A\)] set of functions (see Definition \ref{defn:function_sets})
+	\item[\(\pi_{1}, \pi_{2}\)] coordinate projection functions (see Definition \ref{defn:coord_projection})
+    \item[\(F|_{C}\)] function restriction (see Definition \ref{defn:function_restriction})
+    \item[\(1_A\)] indicator function (see Definition \ref{defn:indicator_function})
+	\item[\(\mathbb{N}_{0}\)] set of natural numbers including zero
+	\item[\(\mathbb{Z}^+\)] set of positive integers not including zero(see Definition \ref{defn:number_sets})
+	\item[\(\mathbb{Z}^-\)] set of negative integers not including zero (see Definition \ref{defn:number_sets})
+	\item[\(\mathbb{Z}_{0}^-\)] set of negative integers including zero (see Definition \ref{defn:number_sets})
+\end{description}
+
+\columnbreak
+
+\subsection*{Non-Standard}
+\begin{description}
+	\item[\(max\)] function mapping sets to their largest element (see Definition \ref{defn:max})
+    \item[\(S\)] set of possible signal strengths (see Definition \ref{defn:signals})
+    \item[\(S^+\)] set of positive signal strengths (see Definition \ref{defn:signals})
+    \item[\(S_{0}\)] set of zero signal strength (see Definition \ref{defn:signals})
+    \item[\(C\)] set of supported redstone components (see Definition \ref{defn:components})
+    \item[\(\Phi_{G_{r}}\)] function mapping \(C\) to every state update function (see Definition \ref{defn:behavior_functions})
+    \item[\(\Omega\)] function mapping \(C\) to every output function (see Definition \ref{defn:behavior_functions})
+    \item[\(\Psi_{G}\)] propagation function (see Definition \ref{defn:propegation})
+    \item[\(I_{G_{r}}\)] input function (see Definition \ref{defn:input_function})
+\end{description}
+\end{multicols}
+
+\section{Introduction}
+In this model, we attempt to formalize Minecraft Redstone using only Zermelo-Fraenkel set theory with the axiom of choice. 
+
+\section{Foundations}
+\noindent
 
 \begin{defn} (Number Set Notation)
+	\label{defn:number_sets}
 	\begin{align}
 		\mathbb{Z}^+ &\coloneq \mathbb{N}_{0} \setminus \{0\} \\
 		\mathbb{Z}^- &\coloneq \{n \in \mathbb{Z}\mid n < 0\} \\
-		\mathbb{Z}_{0}^- &\coloneq \mathbb{Z}^- \cup \{0\} \\
+		\mathbb{Z}_{0}^- &\coloneq \mathbb{Z}^- \cup \{0\}
 	\end{align}
 \end{defn}
 
 \medskip
 
-\begin{defn} (Signal Sets)
+\begin{defn} (Kuratowski Pair)
+	\label{defn:pair}
 	
-	\begin{align}
-		S &\coloneq \{0, 1, 2, ..., 15\} \\
-		S^+ &\coloneq \{x \in S \mid x > 0\} \\
-		S_{0} &\coloneq \{0\}
-	\end{align}
+	Let \(a\) and \(b\) be any elements. \\
+	Then the ordered pair between them
+	\begin{equation}
+		(a, b) \coloneq \{\{a\}, \{a, b\}\}
+	\end{equation}
+	where for any elements \(a_{1}, a_{2}, \ldots, a_{n}\),
+	\begin{equation}
+		(a_{1}, (a_{2}, \ldots, (a_{n - 1}, a_{n}))) \coloneq (a_{1}, a_{2}, \ldots, a_{n})
+	\end{equation}
+	and 
+	\begin{equation}
+		((a_{1}, \ldots, (a_{n - 2}, a_{n - 1})), a_{n}) \coloneq (a_{1}, a_{2}, \ldots, a_{n})
+	\end{equation}
+
 \end{defn}
 
 \medskip
 
-\begin{defn} (Max Delay)
-	
-	\begin{equation}
-		D_{m} \coloneq 4
-	\end{equation}
+\begin{defn} (Cartesian Product)
+	\label{defn:cartesian_product}
 
-	Max delay of any component.
+	Let \(A\) and \(B\) be any sets. \\
+	Then
+	\begin{equation}
+		A \times B \coloneq \{(a, b)) \mid \exists a \in A, \exists b \in B\}
+	\end{equation}
+	where for any sets \(A_{1}, A_{2}, \ldots A_{n}\),
+	\begin{equation}
+		A_{1} \times A_{2} \times \cdots \times A_{n} \coloneq\{(a_{1}, a_{2}, \ldots, a_{n}) \mid \exists a_{1} \in A_{1}, 
+			\exists a_{2} \in A_{2}, \ldots \exists a_{n} \in A_{n}\} 
+	\end{equation}
+	
 \end{defn}
 
 \medskip
 
-\begin{defn} (Component Set)
+\begin{defn} (Functions)
+	\label{defn:function}
+	
+	Let \(A\) and \(B\) be any sets. \\
+	Then a function \(f : A \to B\) if
 	\begin{equation}
-		C \coloneq \{T_{c}, R1_{c}, R2_{c}, R3_{c}, R4_{c}, O_{c}, I_{c}\}
+		f \subseteq A \times B
+	\end{equation}
+	\begin{equation}
+		\forall a \in A, \exists b \in B((a, b) \in f)
+	\end{equation}
+	and
+	\begin{equation}
+		\forall a \in A \forall b, b' \in B((a, b) \in f \land (a, b') \in f \implies b = b')
+	\end{equation}
+	Now let a function \(f : A \to B\), then \(f(x)\) for any \(x \in A\) is defined such that
+	\begin{equation}
+		f(x) = y \iff (x, y) \in f
 	\end{equation}
 
-	The set of supported redstone components. 
+	Next, let \(A\) and \(B\) be any sets where \(A = A_{1} \times A_{2} \times \cdots \times A_{n}\), and let 
+	a function \(f : A \to B\). \\
+	Then \(f(x_{1}, x_{2}, \ldots, x_{n})\) where \((x_{1}, x_{2}, \ldots, x_{n}) \in A\) is defined such that 
+	\begin{equation}
+		f(x_{1}, x_{2}, \ldots, x_{n}) = f(x), x \in A
+	\end{equation}
 \end{defn}
+
+\medskip
+
+\begin{defn} (Coordinate Projection)
+	\label{defn:coord_projection}
+	
+	Let \(A\) and \(B\) any sets. \\
+	Then the function
+	\begin{equation}
+		\pi_{1} : A \times B \to A
+	\end{equation}
+	where
+	\begin{equation}
+		\pi_{1}(a, b) = \bigcup \bigcap (a, b)
+	\end{equation}
+
+	Furthermore, given \(A\) and \(B\) are any sets, then the function
+	\begin{equation}
+		\pi_{2} : A \times B \to B
+	\end{equation}
+	where
+	\begin{equation}
+		\pi_{2}(a, b) = \bigcup\{a \in \bigcup (a, b)\mid a \notin \bigcap(a, b)\}
+	\end{equation}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Set of Functions)
+	\label{defn:function_sets}
+	
+	Let \(A\) and \(B\) be any sets. \\
+	Then 
+	\begin{equation}
+		B^A \coloneq \{f \in \mathcal{P}(A \times B) \mid f : A \times B \}
+	\end{equation}
+\end{defn}
+
+\begin{defn} (Function Restriction)
+	\label{defn:function_restriction}
+	
+	Let \(A\), \(B\), and \(C\) any sets where \(C \subseteq A\), and let a function \(f : A \to B\). \\
+	Then the function
+	\begin{equation}
+		f|_{C} : C \to B
+	\end{equation}
+	where 
+	\begin{equation}
+		f|_{C}(x) = f(x), x \in C
+	\end{equation}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Indicator Function)
+	\label{defn:indicator_function}
+	
+	Let \(X\) and \(A\) be any \(2\) sets where \(A \subseteq X\). \\ 
+	Then the function
+	\begin{equation}
+		1_{A} : X \to \{0, 1\}
+	\end{equation}
+	where
+	\begin{equation}
+		1_{A}(x) = \begin{cases}
+			1 & \text{if } x \in A \\
+			0 & \text{if } x \notin A
+		\end{cases}
+	\end{equation}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Max)
+	\label{defn:max}
+	
+	Let \(Y\) be any non-empty totally ordered set. \\
+	Then the function
+	\begin{equation}
+		max : \mathcal{P}(Y) \to Y
+	\end{equation}
+	where
+	\begin{equation}
+		\forall X \in \mathcal{P}(Y), \exists x \in X(max(X) = x \iff \forall y \in X(x \geq y))
+	\end{equation}
+\end{defn}
+
 
 \medskip
 
@@ -204,7 +375,7 @@
 \begin{defn} (Directed Edges)
 	
 	Let \(V\) be any set of vertices. \\
-	Then \(E\) is a set of directed edges on \(V\) if 
+	Then \(E\) is a set of directed edges if 
 	\begin{equation}
 		E \subseteq (V \times V)
 	\end{equation}
@@ -215,104 +386,155 @@
 \begin{defn} (Graph)
 	
 		Let \(V\) be any set of vertices, and let \(E\) be any set of directed edges on \(V\). \\
-		Then \(G\) is a digraph on \(V\) and \(E\) if
+		Then \(G\) is a digraph if
 		\begin{equation}
 			G = (V, E)
 		\end{equation}
 \end{defn}
 
+\section{Redstone Model}
+
+\begin{defn} (Signal Sets)
+	\label{defn:signals}
+	
+	\begin{align}
+		S &\coloneq \{0, 1, 2, ..., 15\} \\
+		S^+ &\coloneq \{x \in S \mid x > 0\} \\
+		S_{0} &\coloneq \{0\}
+	\end{align}
+\end{defn}
+
 \medskip
 
-\begin{defn} (Propegation)
+\begin{defn} (Propagation)
+	\label{defn:propegation}
 	
-Let \(G = (V, E)\) be any digraph. Then
-
+Let \(G = (V, E)\) be any digraph. \\
+Then the function
 \begin{equation}
-	\omega^+ : V \times \mathcal{P}(G) \rightarrow \mathcal{P}(V) 
+	\Psi_{G} : V \rightarrow \mathcal{P}(V) 
 \end{equation}
-Where
+where
 \begin{equation*}
-	\omega^+(v, G) = 
-	\{u \in V \mid (u, v) \in E\}
-\end{equation*}
-And
-\begin{equation}
-	\omega^- : V \times \mathcal{P}(G) \rightarrow \mathcal{P}(V) 
-\end{equation}
-Where
-\begin{equation*}
-	\omega^-(v, G) = 
+	\Psi_{G}(v) = 
 	\{v \in V \mid \exists (u, v) \in E\}
 \end{equation*}
-
 \end{defn}
 
 \medskip
 
-\begin{defn} (Behavior functions)
-\begin{align}
-	& \beta_{s} : C \to (\mathcal{P}(S) \times S \times \mathbb{N}_{0} \to S) \\
-	& \beta_{o} : C \to (S \times \mathbb{N}_{0} \to S)
-\end{align}
-
+\begin{defn} (Components)
+	\label{defn:components}
+	\begin{equation}
+		C \coloneq \{R_{1_c}, R_{2_c}, R_{3_c}, R_{4_c}, T_{c}\}
+	\end{equation}
+	where 
+	\begin{outline}
+		\1 \(R_{n_{c}}\) for any \(n \in {1, 2, 3, 4}\) corresponds to a repeater with a delay of \(n\) ticks.
+		\1 \(T_{c}\) corresponds to a redstone torch.
+	\end{outline}
 \end{defn}
 
-\medskip
+\pagebreak
 
 \begin{defn} (Redstone Digraph)
 	
-	Let:
+	Let
 	
-	\begin{itemize}
-		\item \(G = (V, E)\) be any digraph
-		\item \(\Sigma : V \times \mathbb{N}_{0} \to S \times \mathbb{N}_{0}\)
-		\item \(\lambda : V \to C\)
-	\end{itemize}
+	\begin{outline}
+		\1 \(G = (V, E)\) be any digraph
+		\1 \(\Sigma : V \times \mathbb{N}_{0} \to \mathbb{N}_{0}\)
+		\1 \(\lambda : V \to C\)
+		\1 \(\mu : E \to S \times S\)
+	\end{outline}
+
+	where 
+	\begin{outline}
+		\1 \(\Sigma\) maps vertices and ticks to a numeric state at that tick.
+		\1 \(\lambda\) maps vertices to components.
+		\1 \(\mu\) maps edges to the signal droppoff between the tail and head vertices where the output of the
+		tail vertex is the input to the state of the head vertex.
+			\2 note: a droppoff of \(15\) implies there is no signal going into the head vertex (i.e. its disconnected, 
+			and therefore floating, which defaults to zero in Minecraft), while a dropoff of 
+			\(0\) implies the vertices as components are touching,
+	\end{outline}
 
 	Then \(G_{r}\) is a redstone digraph if 
 	\begin{equation}
-	G_{r} = (G, \lambda, \Sigma)
+	G_{r} = (G, \Sigma, \lambda, \mu)
 	\end{equation}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Behavior Functions)
+	\label{defn:behavior_functions}
 	
+	Let \(G_{r} = (G, \Sigma, \lambda, \mu)\) be any redstone digraph where \(G = (V, E)\).
+	Then the function
+	\begin{equation}
+		\Phi_{G_{r}} : C \to \mathbb{N}_{0}^{V \times S \times \mathbb{N}_{0} \times \mathbb{Z}^+}
+	\end{equation}
+	and the function
+	\begin{equation}
+		\Omega : C \to  S^{\mathbb{N}_{0}}
+	\end{equation}
+
+	Where
+	\begin{outline}
+		\1 \(\Phi_{G_{r}}\) maps components to state "update" functions.
+			\2 note: the update functions take in
+				\3 the vertex of the component.
+				\3 the back input.
+				\3 the numeric internal state of the component at some tick \(t\).
+				\3 some tick \(t\),
+				\4 note: the tick \(t\) is a positive integer because the state at \(t = 0\) should be manually defined.
+			\2 note: the update functions map the input to the internal state of that vertex 
+			at the next tick.
+		\1 \(\Omega\) maps components to "output" functions.
+			\2 note: the output function takes in
+				\3 the numeric internal state of the component 
+			\2 note: the output function maps the input to what output would be based on its state, i.e. it calculates 
+			the output for the current tick.
+	\end{outline}
+\end{defn}
+
+\medskip
+
+\begin{defn} (Input)
+	\label{defn:input_function}
+	
+	Let \(G_{r} = (G, \Sigma, \lambda, \mu)\) be any redstone digraph where \(G = (V, E)\).
+	Then the function
+	\begin{equation}
+		I_{G_{r}} : V \times \mathbb{Z}^+ \times \{1, 2\} \to S
+	\end{equation}
+	where
+	\begin{equation}
+		I_{G_{r}}(v, t, i) = 
+		\begin{cases}
+			0 & \text{if } \Psi_{G}(v) = \varnothing \\
+			max(\{ \Omega(\lambda(u))(\Sigma(u, t)) - \pi_{1}(\mu(u, v)) \in S \mid u \in \Psi_{G}(v)  \} \cup \{0\}) & \text{if } i = 0 \land \Psi_{G}(v) \neq \varnothing \\
+			max(\{ \Omega(\lambda(u))(\Sigma(u, t)) - \pi_{2}(\mu(u, v)) \in S \mid u \in \Psi_{G}(v)  \} \cup \{0\}) & \text{otherwise}
+		\end{cases}
+	\end{equation}
+
+	Note	
+	\begin{outline}
+		\1 \(v\) is the vertex to get the input of.
+		\1 \(t\) is time in ticks to get the input at. 
+		\1 \(i\) is used to multiplex between the back input and side input of a vertex.
+	\end{outline}
 \end{defn}
 	
-\begin{defn} (State)
+\begin{defn} (State Update)
 
-Let \(G_{r} = (G, \lambda, \Sigma)\) be any redstone digraph where \(G = (V, E)\).
+Let \(G_{r} = (G, \Sigma, \lambda, \mu)\) be any redstone digraph where \(G = (V, E)\).
 
-For any vertex \(v \in V\) at an arbitrary tick \(t \in \mathbb{N}_{0}\), \(I_{v}\) is a set of Input Signals 
-if
-
-\begin{equation*}
-	I_{v} = \{ ((\beta_{o} \circ \lambda)(v) \circ \Sigma)(u, t) \mid u \in \omega^-(v, G)  \}
-\end{equation*}
-
-and \(D_{v}\) is a set of Input Durations if
+Then, for any vertex \(v \in V\) at an arbitrary tick \(t \in \mathbb{N}_{0}\),
 
 \begin{equation}
-	D_{v} = \{\varphi \in S \mid (\varphi, \delta) \in \Sigma(v, t), \delta \in \mathbb{N}_{0}\} \cup \{\Phi\}
-\end{equation}
-
-Where
-
-\begin{equation}
-	\Phi = (\beta_{s} \circ \lambda)(v)(I_{v}, \Sigma(v, t))
-\end{equation}
-
-And
-
-\begin{equation}
-	\Delta = 
-	\begin{cases}
-		\delta + 1,\, (\varphi, \delta) \in \Sigma(v, t) & \text{if } (D_{v} \subseteq S^+) \vee (D_{v} \subseteq S_{0})\\	
-		0 & \text{otherwise} \\	
-	\end{cases}
-\end{equation}
-
-Then
-
-\begin{equation}
-	\Sigma(v, t + 1)|_{V \times \mathbb{Z}^+} = (\Phi, \Delta) \\
+	\Sigma(v, t + 1)|_{V \times \mathbb{Z}^+} = \Phi_{G_{r}}(\lambda(v))(v, I_{G_{r}}(v, t, 1), \Sigma(v, t), t) \\
 \end{equation}
 
 Note: the state mapping isn't defined for \(t = 0\) to allow the implementation to define a custom mapping for all 
@@ -320,184 +542,146 @@ vertices at \(t = 0\).
 
 \end{defn}
 
-\section{Redstone Objects}
+\section{Redstone Component Output Functions}
 
 \begin{defn} (Redstone Torch)
 
-	Let
-	\begin{align}
-		& T_{s} : \mathcal{P}(S) \times S \times \mathbb{N}_{0} \rightarrow S \\
-		& T_{o} : S \times \mathbb{N}_{0} \rightarrow S
-	\end{align}
-	Where
-	\begin{align}
-		& T_{s}(I, \varphi, \delta) =
-		\begin{cases}
-			0 & \text{if } Max(I) \subseteq S_{0} \\
-			15 & \text{otherwise}
-		\end{cases} \\[\jot]
-		& T_{o}(\varphi, \delta) =
-		\begin{cases}
-			15 & \text{if } \varphi \in S_{0} \\
-			0 & \text{otherwise}
-		\end{cases}
-	\end{align}
-	Then
-	\begin{align}
-		& \beta_{s}(T_{c}) = T_{s} \\
-		& \beta_{o}(T_{c}) = T_{o}
-	\end{align}
+	Let \(G_{r} = (G, \Sigma, \lambda, \mu)\) be any redstone digraph where \(G = (V, E)\).
+	Next let
+	\begin{equation}
+		\phi(v, i, \sigma, t) = i 
+	\end{equation}
+	and
+	\begin{equation}
+		\omega(\sigma) = 15 * 1_{S_{0}}(\sigma)
+	\end{equation}
+	Then \(\Phi_{G_{r}}(T_{c}) = \phi\) and \(\Omega(T_{c}) = \omega\).
 \end{defn}
 
 \begin{defn} (Repeater(s))
 	
 	Let
+	\begin{outline}
+	\1 \(G_{r} = (G, \Sigma, \lambda, \mu)\) be any redstone digraph where \(G = (V, E)\).
+	\1 \(t \in \mathbb{N}_{0}\).
+	\1 \(i_{i} = max(\{I_{G_{r}}(u, t, 2) \mid u \in \Psi_{G}\} \cup \{0\})\)
+	\end{outline}
+	Next, for \(n \in \{1, 2, 3, 4\}\), let
 	\begin{align}
-		& n \in \{1, 2, 3, 4\}, Rn_{s} : \mathcal{P} (S) \times S \times \mathbb{N}_{0} \rightarrow S \\
-		& n \in \{1, 2, 3, 4\}, Rn_{o} : S \times \mathbb{N}_{0} \rightarrow S
+		& N_{n}(v, i, \sigma, t) = 
+		\begin{cases}
+			1		   & \text{if }	 (i \in S^+) \land [(\sigma \geq 2n) \vee (\sigma = 0)]\\
+			\sigma + 1 & \text{if }	 0 < \sigma < n \\
+			\sigma + 1 & \text{if }	 (i \in S_{0}) \land (n \leq \sigma < 2n) \\
+			n		   & \text{if }	 (i \in S^+) \land (\sigma = 2n - 1) \\
+			0		   & \text{otherwise}
+		\end{cases}
 	\end{align}
-	Where
 	\begin{align}
-		& Rn_{s}(I, \varphi, \delta) = 
+		& L_{n}(v, i, \sigma, t) = 
 		\begin{cases}
-			15 & \text{if } Max(I) \subseteq S^+\\
-			15 & \text{if } (\varphi \in S^+) \land (Max(I) \subseteq S_{0}) \land (\delta < n) \\
-			0 & \text{ otherwise }
-		\end{cases} \\[\jot]
-		& Rn_{o}(\varphi, \delta) = 
+			n & \text{if }	n <= \sigma < 2n \\
+			0 & \text{otherwise} \\
+		\end{cases}
+	\end{align}
+	\begin{align}
+		& \phi_{n}(v, i, \sigma, t) = 
 		\begin{cases}
-			15 & \text{if } (|\varphi \cap S^+| > 1) \land (\delta >= n) \\
-			15 & \text{if } (\varphi \subseteq S_{0}) \land (\delta < n) \\
+			L_{n}(v, i, \sigma, t) & \text{if } (i_{i} > 0) \vee (I_{G_{r}}(v, t, 2) > 0)\\
+			N_{n}(v, i, \sigma, t) & \text{otherwise}
+		\end{cases}
+	\end{align}	
+	and
+	\begin{align}
+		& \omega_{n}(\sigma) = 
+		\begin{cases}
+			15 & \text{if } n \leq \sigma < 2n \\
 			0 & \text{ otherwise }
 			\end{cases}
 	\end{align}
-	Then
-	\begin{align}
-			& n \in {1, 2, 3, 4}, \beta_{s}(Rn_{c}) = Rn_{s} \\
-			& n \in {1, 2, 3, 4}, \beta_{o}(Rn_{c}) = Rn_{o}
-	\end{align}
+	Then, \(\Phi_{G_{r}}(R_{n_c}) = \phi_{n}\) and \(\Omega(R_{n_{c}}) = \omega_{n}\).
 \end{defn}
 
-\begin{defn} (Lamp (Output))
-	
-	Let
-	\begin{align}
-		& O_{s} : \mathcal{P} (S) \times S \times \mathbb{N}_{0} \rightarrow S \\
-		& O_{o} : S \times \mathbb{N}_{0} \rightarrow S
-	\end{align}
-	Where
-	\begin{align}
-		&O_{s}(I, \varphi, \delta) = 
-		\begin{cases}
-			0 & \text{if } Max(I) \subseteq S_{0} \\
-			15 & \text{otherwise}
-		\end{cases} \\[\jot]
-		&O_{o}(\varphi, \delta) = 
-		\begin{cases}
-			15 & \text{if } (\varphi \cap S^+| > 1) \\
-			15 & \text{if } (\varphi \subseteq S_{0}) \land (\delta = 0) \\
-			0 & \text{otherwise}
-		\end{cases}
-	\end{align}
-	Then
-	\begin{align}
-		& \beta_{s}(O_{c}) = O_{s} \\
-		& \beta_{o}(O_{c}) = O_{o}
-	\end{align}
-\end{defn}
-
-\begin{defn} (Lever (Input))
-	
-	Let
-	\begin{align}
-		& I_{s} : \mathcal{P} (S) \times S \times \mathbb{N}_{0} \rightarrow S \\
-		& I_{o} : S \times \mathbb{N}_{0} \rightarrow S
-	\end{align}
-	Where
-	\begin{align}
-		& I_{s}(I, \varphi, \delta) = \varphi \\
-		& I_{o}(\varphi, \delta) = \varphi
-	\end{align}
-	Then
-	\begin{align}
-		& \beta_{s}(I_{c}) = I_{s} \\
-		& \beta_{o}(I_{c}) = I_{o}
-	\end{align}
-\end{defn}
+\section{Applications}
 
 \begin{proof} Clock proof
 	
-	\begin{itemize}
-		\item Let \(G_{r} = (G, \lambda, \Sigma)\) be a redstone digraph where \(G = (V, E)\). 
-		\item Let \(V = \{t_{1}, t_{2}, t_{3}\}\) and \(E = \{(t_{1}, t_{2}), (t_{2}, t_{3}), (t_{3}, t_{1})\}\).
-		\item Let \(\forall v \in V(\lambda(v) = T_{c})\).
-		\item Let \(\forall v \in V(\Sigma(v, 0) = (0, D_{m}))\).
-	\end{itemize}
+	\begin{outline}
+		\1 Let \(G_{r} = (G, \Sigma, \lambda)\) be a redstone digraph where \(G = (V, E)\). 
+		\1 Let \(V = \{t_{1}, t_{2}, t_{3}\}\) and \(E = \{(t_{1}, t_{2}), (t_{2}, t_{3}), (t_{3}, t_{1})\}\).
+		\1 Let \(\forall v \in V(\Sigma(v, 0) = 0)\).
+		\1 Let \(\forall v \in V(\lambda(v) = T_{c})\).
+		\1 Let \(\mu(v_{1}, v_{2}) = (2, 15)\), \(\mu(v_{2}, v_{3}) = (2, 15)\), \(\mu(v_{3}, v_{1}) = (2, 15)\).
+	\end{outline}
 
-	For \(t_{3}\) (vertex) at \(t = 1\) (tick), \(I_{t_{3}}\) is a set of Input Vertices where 
-	\begin{align*}
-		& I_{t_{3}} = \{((\beta_{o} \circ \lambda)(t_{3}) \circ \Sigma)(t_{2}, 0)\} \\
-		& = \{(\beta_{o} \circ T_{c} \circ \Sigma)(t_{2}, 0)\} \\
-		& = \{T_{o}(\Sigma(t_{2}, 0)\} \\
-		& = \{T_{o}(0, 4)\} \\
-		& = \{15\} \\
-	\end{align*}
-
-	Now let
-
-	\begin{align*}
-		& \Phi = (\beta_{s} \circ \lambda)(v_{3})(I_{v_{3}}, \Sigma(v_{3}, 0)) \\
-		& = (\beta_{s} \circ T_{c})(\{15\}, 0, 4) \\
-		& = T_{s}(\{15\}, 0, 4) \\
-		& =  15 \\
-	\end{align*}
-	
-	Then \(D_{t_{3}}\) is a set of Input Durations where
-	\begin{align*}
-		& D_{t_{3}} = \{\phi \in S \mid (\phi, \delta) \in \Sigma(v_{3}, 0)\} \cup \{\Phi\} \\
-		& = \{0\} \cup \{15\} \\
-		& = \{0, 15\} \\
-	\end{align*}
-
-	Now let 
-	\begin{align*}
-		\Delta = 0
-	\end{align*}
-
+	Let \(v = t_{3}\) and \(t = 1\). \\
 	Then
-	
 	\begin{align*}
-		& \Sigma(t_{3}, 1) = (\Phi, \Delta) \\
-		& = (15, 0)
+		\Sigma(v, t + 1) &= \Phi_{G_{r}}(\lambda(v))(v, I_{G_{r}}(v, t, 1), \Sigma(v, t), t) \implies \\
+		\Sigma(v, t) &= \Phi_{G_{r}}(\lambda(v))(v, I_{G_{r}}(v, t - 1, 1), \Sigma(v, t - 1), t - 1) \implies \\
+		\Sigma(t_{3}, 1) &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 1 - 1, 1), \Sigma(v_{1}, 1 - 1), 1 - 1)\\
+						 &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 0, 1), \Sigma(v_{1}, 0), 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, I_{G_{r}}(v_{1}, 0, 1), 0, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(\lambda(v_{2}))(\Sigma(v_{2}, 0)) - \pi_{1}(\mu(v_{2}, v_{3}))\} \cup \{0\}), 0, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(T_{c})(0) - \pi_{1}(2, 15)\} \cup \{0\}), 0, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{15 - 2\} \cup \{0\}), 0, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, 13, 0, 0) \\
+						 &= 15 \\
 	\end{align*}
 
-	And the output at \(t = 1\) is then 
+	Next let \(v = t_{3}\) and \(t = 2\). \\
+	Then 
 	\begin{align*}
-		(\beta_{o} \circ \lambda)(t_{3})(\Sigma(t_{3}, 1) &= (\beta_{o} \circ T_{c})(\Sigma(t_{3}, 1)) \\
-		& = T_{o}(\Sigma(t_{3}, 1)) \\ 
-		& = T_{o}(15, 0) \\ 
+		\Sigma(t_{3}, 2) &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 2 - 1, 1), \Sigma(v_{1}, 2 - 1), 2 - 1)\\
+						 &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 1, 1), \Sigma(v_{1}, 1), 1) \\
+	\end{align*}
+	where 
+	\begin{align*}
+		\Sigma(v_{1}, 1) &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 1 - 1, 1), \Sigma(v_{1}, 1 - 1), 1 - 1) \\ 
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, I_{G_{r}}(v_{1}, 0, 1), \Sigma(v_{1}, 0), 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(\lambda(v_{3}))(\Sigma(v_{3}, 0)) - \pi_{1}(\mu(v_{3}, v_{1}))\} \cup \{0\}), 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(T_{c})(0) - \pi_{1}(2, 15)\} \cup \{0\}), 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{15 - 2\} \cup \{0\}), 0, 1), 0\\
+						 &= \Phi_{G_{r}}(T_{c})(v_{1}, 13, 0, 0) \\
+						 &= 15 \\
+	\end{align*}
+	then 
+	\begin{align*}
+		\Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 1, 1), 13, 1) &= \Phi_{G_{r}}(T_{c})(v_{1}, I_{G_{r}}(v_{1}, 1, 1), 13, 1)\\
+																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(\lambda(v_{3}))(\Sigma(v_{1}, 0)) - \pi_{1}(\mu(v_{1}, v_{3}))\} \cup \{0\}), 13, 1) \\
+																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(T_{c})(13) - \pi_{1}(2, 15)\} \cup \{0\}), 13, 1)\\
+																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{0 - 2\} \cup \{0\}), 13, 1)\\
+																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, 0, 15, 1)\\
+																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, 0, 15, 1)\\
+																		   &= 0\\
+	\end{align*}
+
+	The output of \(v_{3}\) at \(t = 2\) is then 
+	\begin{align*}
+		\Omega(\lambda(t_{3}))(\Sigma(t_{3}, 2)) &= \Omega(T_{c})(0) \\
+		& = 15 \\ 
+	\end{align*}
+	then for \(t = 1\)
+	\begin{align*}
+		\Omega(\lambda(t_{3}))(\Sigma(t_{3}, 1)) &= \Omega(T_{c})(15) \\
 		& = 0 \\ 
 	\end{align*}
 
-	And the output at \(t = 0\) is 
+	and finally for \(t = 0\)
 	\begin{align*}
-		(\beta_{o} \circ \lambda)(t_{3})(\Sigma(t_{3}, 0) &= (\beta_{o} \circ T_{c})(\Sigma(t_{3}, 0)) \\
-		& = T_{o}(\Sigma(t_{3}, 0)) \\ 
-		& = T_{o}(0, 4) \\ 
-		& = 15 \\ 	
+		\Omega(\lambda(t_{3}))(\Sigma(t_{3}, 0)) &= \Omega(T_{c})(\Sigma(t_{3}, 0)) \\
+		& = 15 \\ 
 	\end{align*}
 
-	Finally, it is then proven that
+	Hence, it is then proven that
 
 	\begin{displaymath}
-		\begin{array}{|c|c|c|}
-		t_{3} & t = 0 & t = 1\\
+		\begin{array}{|c|c|c|c|}
+			t_{3} & t = 0 & t = 1 & t = 2\\
  		\hline
-		0 & 15 & 0
+			0 & 15 & 0 & 15
  		\end{array}
 	\end{displaymath}
-
-	
 \end{proof}
 
 \end{document}

@@ -16,7 +16,7 @@
             "inherits": "base",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "cl.exe",
-				"CMAKE_CXX_FLAGS": "-DPLATFORM_WINDOWS"
+				"CMAKE_CXX_FLAGS": "-DPLATFORM_WINDOWS -openmp"
             },
             "condition": {
                 "type": "equals",

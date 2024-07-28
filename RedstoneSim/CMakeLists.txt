@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 3.8)
 set (PROJ_NAME RedstoneSim)
 project(${PROJ_NAME})
 
-find_package(raylib CONFIG REQUIRED)
-find_path(RAYGUI_INCLUDE_DIRS "raygui.h")
-  
 set (SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set (VENDOR_DIR "${CMAKE_SOURCE_DIR}/vendor")
 
@@ -24,6 +21,3 @@ add_custom_command(
     COMMENT "Copying compile_commands.json to src directory"
     VERBATIM
 )
-
-target_link_libraries(${PROJ_NAME} PRIVATE raylib)
-target_include_directories(${PROJ_NAME} PRIVATE ${RAYGUI_INCLUDE_DIRS})

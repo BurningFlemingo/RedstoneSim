@@ -609,63 +609,65 @@ vertices at \(t = 0\).
 	\begin{outline}
 		\1 Let \(G_{r} = (G, \Sigma, \lambda)\) be a redstone digraph where \(G = (V, E)\). 
 		\1 Let \(V = \{t_{1}, t_{2}, t_{3}\}\) and \(E = \{(t_{1}, t_{2}), (t_{2}, t_{3}), (t_{3}, t_{1})\}\).
-		\1 Let \(\forall v \in V(\Sigma(v, 0) = 0)\).
+		\1 Let \(\Sigma(t_{1}, 0) = 0, \Sigma(t_{2}, 0) = 15, \Sigma(t_{3}, 0) = 0\).
 		\1 Let \(\forall v \in V(\lambda(v) = T_{c})\).
 		\1 Let \(\mu(v_{1}, v_{2}) = (2, 15)\), \(\mu(v_{2}, v_{3}) = (2, 15)\), \(\mu(v_{3}, v_{1}) = (2, 15)\).
 	\end{outline}
 
-	Assuming that this redstone circuit was not built instantly
-	Let \(v = t_{3}\) and \(t = 1\). \\
+	Where the initial state, components, and dropoff were taken directly from a 3 torch clock circuit in Minecraft, assuming
+	that \(t = 0\) is the moment the last piece of redstone was placed to complete the circuit, and that the circuit stabalized
+	(no components changed state between some arbitrary \(t\) and \(t + 1\)) before the circuit was completed. \\
+	Next let \(v = t_{3}\) and \(t = 1\). \\
 	Then
 	\begin{align*}
 		\Sigma(v, t + 1) &= \Phi_{G_{r}}(\lambda(v))(v, I_{G_{r}}(v, t, 1), \Sigma(v, t), t) \implies \\
 		\Sigma(v, t) &= \Phi_{G_{r}}(\lambda(v))(v, I_{G_{r}}(v, t - 1, 1), \Sigma(v, t - 1), t - 1) \implies \\
-		\Sigma(t_{3}, 1) &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 1 - 1, 1), \Sigma(v_{1}, 1 - 1), 1 - 1)\\
-						 &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 0, 1), \Sigma(v_{1}, 0), 0) \\
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, I_{G_{r}}(v_{1}, 0, 1), 0, 0) \\
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(\lambda(v_{2}))(\Sigma(v_{2}, 0)) - \pi_{1}(\mu(v_{2}, v_{3}))\} \cup \{0\}), 0, 0) \\
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(T_{c})(0) - \pi_{1}(2, 15)\} \cup \{0\}), 0, 0) \\
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{15 - 2\} \cup \{0\}), 0, 0) \\
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, 13, 0, 0) \\
-						 &= 15 \\
+		\Sigma(t_{3}, 1) &= \Phi_{G_{r}}(\lambda(t_{3}))(v_{3}, I_{G_{r}}(t_{3}, 1 - 1, 1), \Sigma(t_{3}, 1 - 1), 1 - 1)\\
+						 &= \Phi_{G_{r}}(\lambda(t_{3}))(v_{3}, I_{G_{r}}(t_{3}, 0, 1), \Sigma(t_{3}, 0), 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(t_{3}, I_{G_{r}}(t_{3}, 0, 1), 0, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(t_{3}, max(\{\Omega(\lambda(t_{2}))(\Sigma(t_{2}, 0)) - \pi_{1}(\mu(t_{2}, t_{3}))\} \cup \{0\}), 0, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(t_{3}, max(\{\Omega(T_{c})(15) - \pi_{1}(2, 15)\} \cup \{0\}), 0, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(t_{3}, max(\{0 - 2\} \cup \{0\}), 0, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(t_{3}, 0, 0, 0) \\
+						 &= 0 \\
 	\end{align*}
 
 	Next let \(v = t_{3}\) and \(t = 2\). \\
 	Then 
 	\begin{align*}
-		\Sigma(t_{3}, 2) &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 2 - 1, 1), \Sigma(v_{1}, 2 - 1), 2 - 1)\\
-						 &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 1, 1), \Sigma(v_{1}, 1), 1) \\
+		\Sigma(t_{3}, 2) &= \Phi_{G_{r}}(\lambda(t_{3}))(t_{3}, I_{G_{r}}(t_{3}, 2 - 1, 1), \Sigma(v_{3}, 2 - 1), 2 - 1)\\
+						 &= \Phi_{G_{r}}(\lambda(t_{3}))(t_{3}, I_{G_{r}}(t_{3}, 1, 1), \Sigma(v_{3}, 1), 1) \\
+						 &= \Phi_{G_{r}}(T_{c})(t_{3}, max(\{\Omega(\lambda(t_{2}))(\Sigma(t_{2}, 1)) - \pi_{1}(\mu(t_{2}, t_{3}))\} \cup \{0\}), 0, 1) \\
 	\end{align*}
 	where 
 	\begin{align*}
-		\Sigma(v_{1}, 1) &= \Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 1 - 1, 1), \Sigma(v_{1}, 1 - 1), 1 - 1) \\ 
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, I_{G_{r}}(v_{1}, 0, 1), \Sigma(v_{1}, 0), 0) \\
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(\lambda(v_{3}))(\Sigma(v_{3}, 0)) - \pi_{1}(\mu(v_{3}, v_{1}))\} \cup \{0\}), 0) \\
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(T_{c})(0) - \pi_{1}(2, 15)\} \cup \{0\}), 0) \\
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{15 - 2\} \cup \{0\}), 0, 1), 0\\
-						 &= \Phi_{G_{r}}(T_{c})(v_{1}, 13, 0, 0) \\
-						 &= 15 \\
+		\Sigma(t_{2}, 1) &= \Phi_{G_{r}}(\lambda(t_{2}))(t_{1}, I_{G_{r}}(t_{2}, 1 - 1, 1), \Sigma(t_{2}, 1 - 1), 1 - 1) \\ 
+						 &= \Phi_{G_{r}}(T_{c})(t_{2}, I_{G_{r}}(t_{2}, 0, 1), \Sigma(t_{2}, 0), 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(t_{2}, max(\{\Omega(\lambda(t_{1}))(\Sigma(t_{1}, 0)) - \pi_{1}(\mu(t_{1}, t_{2}))\} \cup \{0\}), 15, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(t_{2}, max(\{\Omega(T_{c})(15) - \pi_{1}(2, 15)\} \cup \{0\}), 15, 0) \\
+						 &= \Phi_{G_{r}}(T_{c})(t_{2}, max(\{0 - 2\} \cup \{0\}), 0, 1), 15, 0\\
+						 &= \Phi_{G_{r}}(T_{c})(t_{2}, 0, 15, 0) \\
+						 &= 0 \\
 	\end{align*}
 	then 
 	\begin{align*}
-		\Phi_{G_{r}}(\lambda(v_{1}))(v_{1}, I_{G_{r}}(v_{1}, 1, 1), 13, 1) &= \Phi_{G_{r}}(T_{c})(v_{1}, I_{G_{r}}(v_{1}, 1, 1), 13, 1)\\
-																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(\lambda(v_{3}))(\Sigma(v_{1}, 0)) - \pi_{1}(\mu(v_{1}, v_{3}))\} \cup \{0\}), 13, 1) \\
-																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{\Omega(T_{c})(13) - \pi_{1}(2, 15)\} \cup \{0\}), 13, 1)\\
-																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, max(\{0 - 2\} \cup \{0\}), 13, 1)\\
-																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, 0, 15, 1)\\
-																		   &= \Phi_{G_{r}}(T_{c})(v_{1}, 0, 15, 1)\\
-																		   &= 0\\
+		&\Phi_{G_{r}}(T_{c})(t_{3}, max(\{\Omega(\lambda(t_{2}))(\Sigma(t_{2}, 1)) - \pi_{1}(\mu(t_{2}, t_{3}))\} \cup \{0\}), 0, 1) = \\
+																		   &= \Phi_{G_{r}}(T_{c})(t_{2}, max(\{\Omega(T_{c})(15) - \pi_{1}(2, 15)\} \cup \{0\}), 0, 1)\\
+																		   &= \Phi_{G_{r}}(T_{c})(t_{2}, max(\{0 - 2\} \cup \{0\}), 0, 1)\\
+																		   &= \Phi_{G_{r}}(T_{c})(t_{2}, 0, 0, 1)\\
+																		   &= \Phi_{G_{r}}(T_{c})(t_{2}, 0, 0, 1)\\
+																		   &= 15\\
 	\end{align*}
 
 	The output of \(v_{3}\) at \(t = 2\) is then 
 	\begin{align*}
-		\Omega(\lambda(t_{3}))(\Sigma(t_{3}, 2)) &= \Omega(T_{c})(0) \\
-		& = 15 \\ 
+		\Omega(\lambda(t_{3}))(\Sigma(t_{3}, 2)) &= \Omega(T_{c})(15) \\
+		& = 0 \\ 
 	\end{align*}
 	then for \(t = 1\)
 	\begin{align*}
-		\Omega(\lambda(t_{3}))(\Sigma(t_{3}, 1)) &= \Omega(T_{c})(15) \\
-		& = 0 \\ 
+		\Omega(\lambda(t_{3}))(\Sigma(t_{3}, 1)) &= \Omega(T_{c})(0) \\
+		& = 15 \\ 
 	\end{align*}
 
 	and finally for \(t = 0\)
@@ -674,13 +676,13 @@ vertices at \(t = 0\).
 		& = 15 \\ 
 	\end{align*}
 
-	Hence, it is then proven that
+	Hence, it is then proven that for \(t_{3}\),
 
 	\begin{displaymath}
-		\begin{array}{|c|c|c|c|}
-			t_{3} & t = 0 & t = 1 & t = 2\\
+		\begin{array}{|c|c|c|}
+			t = 0 & t = 1 & t = 2\\
  		\hline
-			0 & 15 & 0 & 15
+			 15 & 15 & 0
  		\end{array}
 	\end{displaymath}
 \end{proof}

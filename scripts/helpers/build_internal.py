@@ -2,7 +2,7 @@ import subprocess
 import platform
 import os
 
-buildType = "internal"
+buildType = "release"
 
 buildPlatform = platform.system().lower();
 buildArgument = f"{buildPlatform}-{buildType}"

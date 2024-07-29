@@ -614,9 +614,6 @@ vertices at \(t = 0\).
 		\1 Let \(\mu(v_{1}, v_{2}) = (2, 15)\), \(\mu(v_{2}, v_{3}) = (2, 15)\), \(\mu(v_{3}, v_{1}) = (2, 15)\).
 	\end{outline}
 
-	Where the initial state, components, and dropoff were taken directly from a 3 torch clock circuit in Minecraft, assuming
-	that \(t = 0\) is the moment the last piece of redstone was placed to complete the circuit, and that the circuit stabalized
-	(no components changed state between some arbitrary \(t\) and \(t + 1\)) before the circuit was completed. \\
 	Next let \(v = t_{3}\) and \(t = 1\). \\
 	Then
 	\begin{align*}
@@ -656,13 +653,13 @@ vertices at \(t = 0\).
 																		   &= \Phi_{G_{r}}(T_{c})(t_{2}, max(\{0 - 2\} \cup \{0\}), 0, 1)\\
 																		   &= \Phi_{G_{r}}(T_{c})(t_{2}, 0, 0, 1)\\
 																		   &= \Phi_{G_{r}}(T_{c})(t_{2}, 0, 0, 1)\\
-																		   &= 15\\
+																		   &= 0\\
 	\end{align*}
 
 	The output of \(v_{3}\) at \(t = 2\) is then 
 	\begin{align*}
-		\Omega(\lambda(t_{3}))(\Sigma(t_{3}, 2)) &= \Omega(T_{c})(15) \\
-		& = 0 \\ 
+		\Omega(\lambda(t_{3}))(\Sigma(t_{3}, 2)) &= \Omega(T_{c})(0) \\
+		& = 15 \\ 
 	\end{align*}
 	then for \(t = 1\)
 	\begin{align*}
@@ -676,13 +673,13 @@ vertices at \(t = 0\).
 		& = 15 \\ 
 	\end{align*}
 
-	Hence, it is then proven that for \(t_{3}\),
+	Hence, it is then proven that the output of \(t_{3}\) is
 
 	\begin{displaymath}
 		\begin{array}{|c|c|c|}
 			t = 0 & t = 1 & t = 2\\
  		\hline
-			 15 & 15 & 0
+			 15 & 15 & 15
  		\end{array}
 	\end{displaymath}
 \end{proof}

@@ -1,7 +1,17 @@
 #pragma once
 #include <vector>
 
-enum Component : int { RedstoneTorch = 0, Lever, NullComponent };
+enum Component : int {
+	RedstoneTorch = 0,
+	Repeater1,
+	Repeater2,
+	Repeater3,
+	Repeater4,
+	Lever,
+	Output,
+
+	NullComponent
+};
 
 struct Edge {
 	int tail;

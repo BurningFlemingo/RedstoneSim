@@ -11,6 +11,8 @@
 constexpr int MAX_SIGNAL_VALUE{ 15 };
 constexpr int MIN_SIGNAL_VALUE{ 0 };
 
+std::vector<int> propegateBack(int vertex, const Graph& graph);
+
 bool isSignalValid(int signal) {
 	if (signal > MAX_SIGNAL_VALUE || signal < MIN_SIGNAL_VALUE) {
 		return false;
@@ -30,19 +32,6 @@ int max(std::span<int> signalInputs) {
 	return largestSignal;
 }
 
-// output behavior function
-namespace OBF {
-	int torch(const int state) {
-		if (state == MIN_SIGNAL_VALUE) {
-			return MAX_SIGNAL_VALUE;
-		}
-		return MIN_SIGNAL_VALUE;
-	}
-	int lever(const int state) {
-		return state;
-	}
-}  // namespace OBF
-
 // state behavior function
 namespace SBF {
 	int torch(
@@ -60,6 +49,74 @@ namespace SBF {
 		return MAX_SIGNAL_VALUE;
 	}
 
+	int repeater(
+		const Graph& graph,
+		const int vertex,
+		const int signalInput,
+		const int state,
+		const int t,
+		const int n
+	) {
+		std::vector<int> inputSignals{ propegateBack(vertex, graph) };
+		assert(n > 0 && n <= 4);
+		if (signalInput > 0 || max(inputSignals) > 0) {
+			if (signalInput > 0 && (state >= 2 * n || state == 0)) {
+				return 1;
+			}
+			if (state > 0 && state < n) {
+				return state + 1;
+			}
+			if (signalInput == 0 && n <= state && state < 2 * n) {
+				return state + 1;
+			}
+			if (signalInput >= 0 && state == (2 * n) - 1) {
+				return n;
+			}
+			return 0;
+		} else {
+			if (n <= state && state < 2 * n) {
+				return n;
+			} else {
+				return 0;
+			}
+		}
+	}
+	int repeater1(
+		const Graph& graph,
+		const int vertex,
+		const int signalInput,
+		const int state,
+		const int t
+	) {
+		return repeater(graph, vertex, signalInput, state, t, 1);
+	}
+	int repeater2(
+		const Graph& graph,
+		const int vertex,
+		const int signalInput,
+		const int state,
+		const int t
+	) {
+		return repeater(graph, vertex, signalInput, state, t, 2);
+	}
+	int repeater3(
+		const Graph& graph,
+		const int vertex,
+		const int signalInput,
+		const int state,
+		const int t
+	) {
+		return repeater(graph, vertex, signalInput, state, t, 3);
+	}
+	int repeater4(
+		const Graph& graph,
+		const int vertex,
+		const int signalInput,
+		const int state,
+		const int t
+	) {
+		return repeater(graph, vertex, signalInput, state, t, 4);
+	}
 	int lever(
 		const Graph& graph,
 		const int vertex,
@@ -70,15 +127,67 @@ namespace SBF {
 		assert(isSignalValid(state));
 		return state;
 	}
+	int output(
+		const Graph& graph,
+		const int vertex,
+		const int signalInput,
+		const int state,
+		const int t
+	) {
+		return signalInput;
+	}
 
 }  // namespace SBF
+
+// output behavior function
+namespace OBF {
+	int torch(const int state) {
+		if (state == MIN_SIGNAL_VALUE) {
+			return MAX_SIGNAL_VALUE;
+		}
+		return MIN_SIGNAL_VALUE;
+	}
+
+	int repeater(const int state, const int n) {
+		if (n <= state && state < 2 * n) {
+			return 15;
+		}
+		return 0;
+	}
+
+	int repeater1(const int state) {
+		return repeater(state, 1);
+	}
+	int repeater2(const int state) {
+		return repeater(state, 2);
+	}
+	int repeater3(const int state) {
+		return repeater(state, 3);
+	}
+	int repeater4(const int state) {
+		return repeater(state, 4);
+	}
+
+	int lever(const int state) {
+		return state;
+	}
+
+	int output(const int state) {
+		return state;
+	}
+}  // namespace OBF
 
 namespace {
 	std::function<
 		int(const Graph&, const int vertex, const int, const int, const int)>
-		stateBehaviors[]{ SBF::torch, SBF::lever };
+		stateBehaviors[]{ SBF::torch,	  SBF::repeater1, SBF::repeater2,
+						  SBF::repeater3, SBF::repeater4, SBF::lever,
+						  SBF::output };
 
-	std::function<int(const int)> outputBehaviors[]{ OBF::torch, OBF::lever };
+	std::function<int(const int)> outputBehaviors[]{
+		OBF::torch,		OBF::repeater1, OBF::repeater2, OBF::repeater3,
+		OBF::repeater4, OBF::lever,		OBF::output
+	};
 }  // namespace
 
 std::vector<int> propegateBack(int vertex, const Graph& graph) {
@@ -143,31 +252,9 @@ int getVertexState(
 		}
 	}
 
-	int currentState{ -1 };
-	if (memoizedCycleState.contains(vertex)) {
-		for (const auto& vertex : memoizedCycleState[vertex].data()) {
-			if (vertex.t == t - 1) {
-				currentState = vertex.signal;
-				break;
-			}
-		}
-	} else {
-		VertexState memoizedVertexState{ memoizedState[vertex] };
-		if (memoizedVertexState.t == t - 1) {
-			currentState = memoizedVertexState.signal;
-		}
-
-		if (currentState == -1) {
-			currentState = getVertexState(
-				vertex,
-				t - 1,
-				initialState,
-				graph,
-				memoizedState,
-				memoizedCycleState
-			);
-		}
-	}
+	int currentState{ getVertexState(
+		vertex, t - 1, initialState, graph, memoizedState, memoizedCycleState
+	) };
 
 	Component component{ graph.vertexComponentMapping[vertex] };
 	int newState{
@@ -216,21 +303,21 @@ int getLengthOfLongestPathToVertex(const Graph& graph, int vertex) {
 	if (graph.vertexComponentMapping.size() == 0) {
 		return 0;
 	}
-	std::set<int> verticesVisited;
-	std::set<int> verticesToCheck{ vertex };
+	std::set<int> verticesVisited{ vertex };
+	std::set<int> verticesToVisit{ vertex };
 	int diameter{};
-	while (verticesToCheck.size() != 0) {
-		std::set<int> newVerticesToCheck;
-		for (const auto& vertexToCheck : verticesToCheck) {
+	while (verticesToVisit.size() != 0) {
+		std::set<int> newVerticesToVisit;
+		for (const auto& vertexToCheck : verticesToVisit) {
 			std::vector<int> vertices{ propegateBack(vertexToCheck, graph) };
 			for (const auto& vertex : vertices) {
 				bool vertexFound{ verticesVisited.contains(vertex) };
 				if (!vertexFound) {
-					newVerticesToCheck.insert(vertex);
+					newVerticesToVisit.insert(vertex);
 				}
 			}
 		}
-		verticesToCheck = newVerticesToCheck;
+		verticesToVisit = newVerticesToVisit;
 		diameter++;
 	};
 	return diameter - 1;
@@ -239,15 +326,15 @@ int getLengthOfLongestPathToVertex(const Graph& graph, int vertex) {
 std::vector<int> initializeAcyclicGraph(
 	const Graph& graph,
 	const int outputVertex,
-	const std::vector<std::pair<int, int>>& initialStateOfLevers = {}
-	// vertex, signal
+	const std::vector<std::pair<int, int>>& customState = {}  // vertex, signal
 ) {
 	std::vector<int> initialState(graph.vertexComponentMapping.size());
-	for (const auto& lever : initialStateOfLevers) {
-		initialState[lever.first] = lever.second;
+	for (const auto& state : customState) {
+		initialState[state.first] = state.second;
 	}
 
-	int ticksToSimulate{ getLengthOfLongestPathToVertex(graph, outputVertex) };
+	int ticksToSimulate{ getLengthOfLongestPathToVertex(graph, outputVertex) +
+						 1 };
 
 	std::vector<VertexState> memoizedState(graph.vertexComponentMapping.size());
 	std::unordered_map<int, SlidingBuffer<VertexState>> memoizedCycleState{};
@@ -262,7 +349,10 @@ std::vector<int> initializeAcyclicGraph(
 		);
 	}
 	for (int i{}; i < initialState.size(); i++) {
-		initialState[i] = memoizedState[i].signal;
+		VertexState memState{ memoizedState[i] };
+		if (memState.t != 0) {
+			initialState[i] = memState.signal;
+		}
 	}
 
 	return initialState;
@@ -297,7 +387,7 @@ void depthFirstSearch(
 	std::vector<int> inputVertices{ propegateBack(tailVertex, graph) };
 	for (const auto& vertex : inputVertices) {
 		if (vertex == parents[tailVertex]) {
-			continue;
+			colors[vertex] = 1;
 		}
 
 		depthFirstSearch(graph, vertex, tailVertex, colors, parents, cycles);
@@ -320,8 +410,15 @@ std::vector<Cycle> depthFirstSearch(const Graph& graph, int headVertex) {
 
 	std::vector<Cycle> reducedCycles;
 	for (const auto& cycle : cycles) {
+		int lastVertex{};
+		if (cycle.size() > 1) {
+			lastVertex = cycle[1];
+		} else {
+			lastVertex = cycle[0];
+		}
+
 		Cycle reducedCycle{ .firstVertex = cycle[0],
-							.lastVertex = cycle[cycle.size() - 1],
+							.lastVertex = lastVertex,
 							.length = (int)cycle.size() };
 		reducedCycles.emplace_back(reducedCycle);
 	}
@@ -329,19 +426,21 @@ std::vector<Cycle> depthFirstSearch(const Graph& graph, int headVertex) {
 }
 
 int main() {
-	Graph clockGraph{};
-	for (int i{}; i < 3; i++) {
-		clockGraph.vertexComponentMapping.emplace_back(RedstoneTorch);
-		clockGraph.dropoffs.emplace_back(Dropoff{ 0, 15 });
-		int endpoint{ i + 1 };
-		if (endpoint != 3) {
-			clockGraph.edges.emplace_back(Edge{ i, endpoint });
-		}
-	}
-	clockGraph.edges.emplace_back(Edge{ 2, 0 });
-	clockGraph.dropoffs.emplace_back(Dropoff{});
+	Graph clockGraph{
+		.vertexComponentMapping = { Lever,
+									RedstoneTorch,
+									Repeater2,
+									Output },
+		.edges = { {0, 1}, {1, 2}, {2, 1},  },
+		.dropoffs = { { 0, 15 },
+					  { 0, 15 },
+					  { 0, 15 },
+					  { 0, 15 },
+					  { 0, 15 },
+					  { 0, 15 } }
+	};
 
-	size_t outputVertex{ clockGraph.vertexComponentMapping.size() - 1 };
+	size_t outputVertex{};
 	std::vector<Cycle> cycles{ depthFirstSearch(clockGraph, outputVertex) };
 
 	Graph acyclicClockGraph{
@@ -351,8 +450,8 @@ int main() {
 	for (const auto& edge : clockGraph.edges) {
 		bool isCyclic{};
 		for (const auto& cycle : cycles) {
-			if (edge.head == cycle.firstVertex &&
-				edge.tail == cycle.lastVertex) {
+			if (edge.head == cycle.lastVertex &&
+				edge.tail == cycle.firstVertex) {
 				isCyclic = true;
 				break;
 			}
@@ -363,8 +462,13 @@ int main() {
 	}
 
 	std::vector<int> clockGraphInitialState{
-		initializeAcyclicGraph(acyclicClockGraph, outputVertex)
+		initializeAcyclicGraph(acyclicClockGraph, outputVertex, {})
 	};
+	std::cout << "initial state: ";
+	for (int i{}; i < clockGraphInitialState.size(); i++) {
+		std::cout << "v" << i << " = " << clockGraphInitialState[i] << ", ";
+	}
+	std::cout << std::endl;
 
 	std::vector<VertexState> memoizedState(
 		clockGraph.vertexComponentMapping.size()
@@ -376,7 +480,11 @@ int main() {
 			SlidingBuffer<VertexState>(cycle.length);
 	}
 
-	for (int i{}; i < 1000000; i++) {
+	std::cout << std::endl;
+	std::cout << "------" << std::endl;
+	std::cout << "t : v" << outputVertex << std::endl;
+	std::cout << "------" << std::endl;
+	for (int i{}; i < 10; i++) {
 		int output{ getVertexOutput(
 			outputVertex,
 			i,

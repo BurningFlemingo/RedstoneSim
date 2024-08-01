@@ -564,7 +564,8 @@ vertices at \(t = 0\).
 	\begin{outline}
 	\1 \(G_{r} = (G, \Sigma, \lambda, \mu)\) be any redstone digraph where \(G = (V, E)\).
 	\1 \(t \in \mathbb{N}_{0}\).
-	\1 \(i_{i} = max(\{I_{G_{r}}(u, t, 2) \mid u \in \Psi_{G}\} \cup \{0\})\)
+	\1 \(v \in V\).
+	\1 \(i_{i} = max(\{\Sigma(u, t) \mid u \in \Psi_{G}(v), \mu(v, u)\} \cup \{0\})\)
 	\end{outline}
 	Next, for \(n \in \{1, 2, 3, 4\}\), let
 	\begin{align}

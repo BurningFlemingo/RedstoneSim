@@ -1,0 +1,4 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Dev/Projects/RedstoneSim/Assets/Animations/media/videos/scene/1080p60/partial_movie_files/MovingVertices/3977891868_3292454726_2882847097.mp4'
+file 'file:C:/Dev/Projects/RedstoneSim/Assets/Animations/media/videos/scene/1080p60/partial_movie_files/MovingVertices/2852726489_2342503989_3988194944.mp4'
+file 'file:C:/Dev/Projects/RedstoneSim/Assets/Animations/media/videos/scene/1080p60/partial_movie_files/MovingVertices/2852726489_1704852926_1078532844.mp4'

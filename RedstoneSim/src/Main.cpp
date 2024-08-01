@@ -299,11 +299,10 @@ int getVertexOutput(
 	return output;
 }
 
-int getLengthOfLongestPathToVertex(const Graph& graph, int vertex) {
+int getDepth(Graph graph, int vertex) {
 	if (graph.vertexComponentMapping.size() == 0) {
 		return 0;
 	}
-	std::set<int> verticesVisited{ vertex };
 	std::set<int> verticesToVisit{ vertex };
 	int diameter{};
 	while (verticesToVisit.size() != 0) {
@@ -311,10 +310,12 @@ int getLengthOfLongestPathToVertex(const Graph& graph, int vertex) {
 		for (const auto& vertexToCheck : verticesToVisit) {
 			std::vector<int> vertices{ propegateBack(vertexToCheck, graph) };
 			for (const auto& vertex : vertices) {
-				bool vertexFound{ verticesVisited.contains(vertex) };
-				if (!vertexFound) {
-					newVerticesToVisit.insert(vertex);
+				for (Edge& edge : graph.edges) {
+					if (edge.head == vertexToCheck && edge.tail == vertex) {
+						edge = Edge{ -1, -1 };
+					}
 				}
+				newVerticesToVisit.insert(vertex);
 			}
 		}
 		verticesToVisit = newVerticesToVisit;
@@ -323,18 +324,16 @@ int getLengthOfLongestPathToVertex(const Graph& graph, int vertex) {
 	return diameter - 1;
 }
 
-std::vector<int> initializeAcyclicGraph(
+std::vector<int> initializeGraph(
 	const Graph& graph,
 	const int outputVertex,
+	const int ticksToSimulate,
 	const std::vector<std::pair<int, int>>& customState = {}  // vertex, signal
 ) {
 	std::vector<int> initialState(graph.vertexComponentMapping.size());
 	for (const auto& state : customState) {
 		initialState[state.first] = state.second;
 	}
-
-	int ticksToSimulate{ getLengthOfLongestPathToVertex(graph, outputVertex) +
-						 1 };
 
 	std::vector<VertexState> memoizedState(graph.vertexComponentMapping.size());
 	std::unordered_map<int, SlidingBuffer<VertexState>> memoizedCycleState{};
@@ -426,21 +425,18 @@ std::vector<Cycle> depthFirstSearch(const Graph& graph, int headVertex) {
 }
 
 int main() {
-	Graph clockGraph{
-		.vertexComponentMapping = { Lever,
-									RedstoneTorch,
-									Repeater2,
-									Output },
-		.edges = { {0, 1}, {1, 2}, {2, 1},  },
-		.dropoffs = { { 0, 15 },
-					  { 0, 15 },
-					  { 0, 15 },
-					  { 0, 15 },
-					  { 0, 15 },
-					  { 0, 15 } }
-	};
+	Graph clockGraph{ .vertexComponentMapping = { RedstoneTorch,
+												  RedstoneTorch,
+												  RedstoneTorch },
+					  .edges = { { 0, 1 }, { 1, 2 }, { 2, 0 } },
+					  .dropoffs = { { 0, 15 },
+									{ 0, 15 },
+									{ 0, 15 },
+									{ 0, 15 },
+									{ 0, 15 },
+									{ 0, 15 } } };
 
-	size_t outputVertex{};
+	size_t outputVertex{ 2 };
 	std::vector<Cycle> cycles{ depthFirstSearch(clockGraph, outputVertex) };
 
 	Graph acyclicClockGraph{
@@ -461,8 +457,11 @@ int main() {
 		}
 	}
 
+	int ticksToSimulate{ getDepth(clockGraph, outputVertex) };
+	std::cout << ticksToSimulate << std::endl;
+
 	std::vector<int> clockGraphInitialState{
-		initializeAcyclicGraph(acyclicClockGraph, outputVertex, {})
+		initializeGraph(clockGraph, outputVertex, ticksToSimulate, {})
 	};
 	std::cout << "initial state: ";
 	for (int i{}; i < clockGraphInitialState.size(); i++) {

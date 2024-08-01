@@ -1,9 +1,5 @@
 Simulates redstone circuits over time.
 
-Currently only supports levers and torches. 
-
-Note: cyclic graphs have an exponential time complexity, while acyclic graphs have linear time complexity.
-
 ## Building
 
 1. call ```git clone git@github.com:burningflemingo/RedstoneSim --recursive```
